@@ -1,3 +1,4 @@
 *.o
 *.d
 src/test
+doc/_build
