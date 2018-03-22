@@ -3,66 +3,92 @@
 
 const char *ZZ_PAIR = "pair";
 
+struct zz_blob *zz_blob_new(void)
+{
+        struct zz_blob *node = malloc(sizeof(*node));
+        node->next = node;
+        node->prev = node;
+        return node;
+}
+void zz_blob_destroy(struct zz_blob *node)
+{
+        node->prev->next = NULL;
+        while (node) {
+                struct zz_blob *next = node->next;
+                free(node);
+                node = next;
+        }
+}
+int zz_empty(struct zz_blob *node)
+{
+        return node->next == node;
+}
+void zz_link(struct zz_blob *node, struct zz_blob *next)
+{
+        struct zz_blob *prev = next->prev;
+        node->next = next;
+        node->prev = prev;
+        prev->next = node;
+        next->prev = node;
+}
+void zz_unlink(struct zz_blob *node)
+{
+        node->next->prev = node->prev;
+        node->prev->next = node->next;
+}
+
 void zz_ast_init(struct zz_ast* a)
 {
-        a->ptr = NULL;
-        a->size = 0;
-        a->alloc = 0;
+        a->blobs = zz_blob_new();
 }
 void zz_ast_deinit(struct zz_ast *a)
 {
-        free(a->ptr);
+        zz_blob_destroy(a->blobs);
 }
 void *zz_node_new(struct zz_ast* a, int size)
 {
-        if (a->size == a->alloc) {
-                a->alloc = a->alloc ? a->alloc * 2 : 2;
-                a->ptr = realloc(a->ptr, a->alloc * sizeof(*a->ptr));
-        }
-        return (a->ptr[a->size++] = malloc(size));
+        struct zz_blob *b = malloc(sizeof(*b) + size);
+        zz_link(b, a->blobs);
+        return (void *)(b + 1);
 }
 void zz_ast_gc(struct zz_ast *a, struct zz_node *root)
 {
-        void *w_begin[a->size];
-        void *g_begin[a->size];
-        void *b_begin[a->size];
-        void **w_end = w_begin + a->size;
-        void **g_end = g_begin;
-        void **b_end = b_begin;
-        memcpy(w_begin, a->ptr, a->size * sizeof(void *));
-        for (void **i = w_begin; i != w_end;) {
-                if (*i == root) {
-                        *i = *(--w_end);
-                        break;
-                } else {
-                        ++i;
-                }
+        if (zz_empty(a->blobs))
+                return;
+
+        struct zz_blob *white = a->blobs;
+        struct zz_blob *gray = zz_blob_new();
+        struct zz_blob *black = zz_blob_new();
+
+        {
+                struct zz_blob *b = (struct zz_blob *)root - 1;
+                zz_unlink(b);
+                zz_link(b, gray);
         }
-        *(g_end++) = root;
-        fprintf(stderr, "before (W/G/B): (%ld/%ld/%ld)\n",
-                        w_end - w_begin, g_end - g_begin, b_end - b_begin);
-        while (g_begin != g_end) {
-                void *x = *(--g_end);
-                if (zz_is_pair(x)) {
-                        struct zz_pair *p = zz_pair(x);
-                        for (void **i = w_begin; i != w_end;) {
-                                if (*i == p->data || *i == p->next) {
-                                        *(g_end++) = *i;
-                                        *i = *(--w_end);
-                                } else {
-                                        ++i;
-                                }
+
+        while (!zz_empty(gray)) {
+                struct zz_blob *b = gray->next;
+                zz_unlink(b);
+                struct zz_node *n = (void *)(b + 1);
+                if (zz_is_pair(n)) {
+                        struct zz_pair *p = zz_pair(n);
+                        if (p->data) {
+                                struct zz_blob *c = (struct zz_blob *)p->data - 1;
+                                zz_unlink(c);
+                                zz_link(c, gray);
+                        }
+                        if (p->next) {
+                                struct zz_blob *c = (struct zz_blob *)p->next - 1;
+                                zz_unlink(c);
+                                zz_link(c, gray);
                         }
                 }
-                *(b_end++) = x;;
+                zz_link(b, black);
         }
-        fprintf(stderr, "after (W/G/B): (%ld/%ld/%ld)\n",
-                        w_end - w_begin, g_end - g_begin, b_end - b_begin);
-        for (void **i = w_begin; i != w_end; ++i)
-                free(*i);
-        fprintf(stderr, "%ld nodes collected\n", w_end - w_begin);
-        a->size = b_end - b_begin;
-        memcpy(a->ptr, b_begin, a->size * sizeof(void *));
+
+        zz_blob_destroy(white);
+        zz_blob_destroy(gray);
+        a->blobs = black;
 }
 
 struct zz_node *zz_pair_new(struct zz_ast *a,

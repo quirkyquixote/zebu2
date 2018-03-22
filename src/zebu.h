@@ -8,6 +8,10 @@
 
 extern const char *ZZ_PAIR;
 
+struct zz_blob {
+        struct zz_blob *next, *prev;
+};
+
 struct zz_node {
         const char* type;
 };
@@ -24,9 +28,7 @@ struct zz_atom {
 };
 
 struct zz_ast {
-        struct zz_node **ptr;
-        int size;
-        int alloc;
+        struct zz_blob *blobs;
 };
 
 void zz_ast_init(struct zz_ast* a);
