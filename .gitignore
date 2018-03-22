@@ -1,4 +1,6 @@
 *.o
 *.d
-src/test
+*.a
+*.so
+tests/test
 doc/_build

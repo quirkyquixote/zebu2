@@ -1,22 +1,21 @@
 
 include ../config.mk
 
-ALL_LDFLAGS += -lreadline
-
-objs += .obj/main.o
 objs += .obj/zebu.o
 
 deps = $(srcs:.o=.d)
 
 .PHONY: all
-all: test
+all: libzebu.so libzebu.a
 
-test: $(objs)
-	$(QUIET_LINK)$(CC) $(ALL_CFLAGS) $(ALL_LDFLAGS) -o $@ $^
+libzebu.so: $(objs)
+libzebu.a: $(objs)
+
 
 .PHONY: clean
 clean:
-	$(RM) test
+	$(RM) libzebu.so
+	$(RM) libzebu.a
 	$(RM) -r .obj
 
 -include $(deps)
