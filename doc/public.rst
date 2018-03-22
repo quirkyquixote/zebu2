@@ -3,8 +3,8 @@ Public API
 
 .. default-domain:: c
 
-Node
-----
+AST
+---
 
 Handler for all nodes of the AST. Always handled by pointer, the actual node
 may have more fields beyond the end of this struct; if so, the type determines
@@ -14,70 +14,71 @@ The type string is a pointer to a :type:`const char*` that is unique for that
 node type, so two nodes are of the same type if the pointers---not the
 strings---are the same.
 
-All nodes are allocated by a :type:`zz_ast` object, that also keeps a record of
-them and is responsible for deleting the ones that aren't used anymore.
+All nodes are allocated by a :type:`zz_ast_mgr` object, that also keeps a
+record of them and is responsible for deleting the ones that aren't used
+anymore.
 
-.. type:: struct zz_node
+.. type:: struct zz_ast
 
    Base for all AST nodes
 
 ============================ ==============================================
 **Member fields**
 ---------------------------------------------------------------------------
-:member:`~zz_node.type`      a const string, doubles as type name
+:member:`~zz_ast.type`       a const string, doubles as type name
 ---------------------------- ----------------------------------------------
 **Related functions**
 ---------------------------------------------------------------------------
 :func:`zz_print()`           serialize a node
 ============================ ==============================================
 
-.. member:: const char* zz_node.type
+.. member:: const char* zz_ast.type
 
    A const string, doubles as type name
 
-.. function:: int zz_print(struct zz_node* n, FILE* f)
+.. function:: int zz_print(struct zz_ast* n, FILE* f)
 
    Serialize :data:`n`, and write the result to :data:`f`
 
-AST
----
+AST Manager
+-----------
 
 Manager for the full AST
 
-.. type:: struct zz_ast
+.. type:: struct zz_ast_mgr
 
    Manager for the full AST
 
 ============================== ============================================
 **Member fields**
 ---------------------------------------------------------------------------
-:member:`~zz_ast.blobs`        all allocated nodes
+:member:`~zz_ast_mgr.blobs`    all allocated nodes
 ------------------------------ --------------------------------------------
 **Related functions**
 ---------------------------------------------------------------------------
-:func:`zz_ast_init()`          initialize AST manager
-:func:`zz_ast_deinit()`        deinitialize AST manager
-:func:`zz_ast_alloc()`         allocate node
-:func:`zz_ast_gc()`            run garbage collector
+:func:`zz_ast_mgr_init()`      initialize AST manager
+:func:`zz_ast_mgr_deinit()`    deinitialize AST manager
+:func:`zz_ast_mgr_alloc()`     allocate node
+:func:`zz_ast_mgr_gc()`        run garbage collector
 ============================== ============================================
 
-.. member:: void* zz_ast.blobs
+.. member:: void* zz_ast_mgr.blobs
 
    All allocated nodes
 
-.. function:: void zz_ast_init(struct zz_ast* a)
+.. function:: void zz_ast_mgr_init(struct zz_ast_mgr* a)
 
    Initialize AST manager.
 
-.. function:: void zz_ast_deinit(struct zz_ast* a)
+.. function:: void zz_ast_mgr_deinit(struct zz_ast_mgr* a)
 
    Deinitialize AST manager.
 
-.. function:: void* zz_ast_alloc(struct zz_ast* a, int size)
+.. function:: void* zz_ast_mgr_alloc(struct zz_ast_mgr* a, int size)
 
    Allocate a new and register it with the garbage collector.
 
-.. function:: void zz_ast_gc(struct zz_ast* a, struct zz_node* root)
+.. function:: void zz_ast_mgr_gc(struct zz_ast_mgr* a, struct zz_ast* root)
 
    Destroy every allocated node that is not reachable from :data:`root`.
 
@@ -102,9 +103,9 @@ element (that can be another list) and the next element.
 ------------------------------ --------------------------------------------
 **Related functions**
 ---------------------------------------------------------------------------
-:func:`zz_pair_new()`          create new pair
+:func:`zz_pair()`              create new pair
 :func:`zz_is_pair()`           true if a node is a pair
-:func:`zz_pair()`              cast node to pair
+:func:`zz_to_pair()`           cast node to pair
 :func:`zz_foreach()`           iterate on a list of pairs
 ============================== ============================================
 
@@ -116,28 +117,28 @@ element (that can be another list) and the next element.
 
    Always :data:`ZZ_PAIR`
 
-.. member:: struct zz_node* zz_pair.data
+.. member:: struct zz_ast* zz_pair.data
 
    Pointer to the data of this cell
 
-.. member:: struct zz_node* zz_pair.next
+.. member:: struct zz_ast* zz_pair.next
 
    Pointer to the next element
 
-.. function:: struct zz_node* zz_pair_new(struct zz_ast* a, \
-              struct zz_node* data, struct zz_node* next)
+.. function:: struct zz_ast* zz_pair(struct zz_ast_mgr* a, \
+              struct zz_ast* data, struct zz_ast* next)
 
    Create new pair
 
-.. function:: int zz_is_pair(struct zz_node* n)
+.. function:: int zz_is_pair(struct zz_ast* n)
 
    Return :data:`1` if :data:`n` is a pair, :data:`0` otherwise
 
-.. function:: struct zz_pair* zz_pair(struct zz_node* n)
+.. function:: struct zz_pair* zz_to_pair(struct zz_ast* n)
 
    Return :data:`n` cast to :type:`zz_pair`, or :data:`NULL`.
 
-.. function:: void zz_foreach(struct zz_node* x, struct zz_node* head)
+.. function:: void zz_foreach(struct zz_ast* x, struct zz_ast* head)
 
    Iterate on a list of pairs.
 
@@ -160,9 +161,9 @@ Atoms have a token type and an associated string.
 ------------------------------ --------------------------------------------
 **Related functions**
 ---------------------------------------------------------------------------
-:func:`zz_atom_new()`          create new atom
+:func:`zz_atom()`              create new atom
 :func:`zz_is_atom()`           true if a node is a atom
-:func:`zz_atom()`              cast node to atom
+:func:`zz_to_atom()`           cast node to atom
 ============================== ============================================
 
 .. member:: const char* zz_atom.type
@@ -173,18 +174,18 @@ Atoms have a token type and an associated string.
 
    String for the atom
 
-.. function:: struct zz_node* zz_atom_new_with_len(struct zz_ast* a, \
+.. function:: struct zz_ast* zz_atom_with_len(struct zz_ast_mgr* a, \
              const char* type, const char* str, int len)
-              struct zz_node* zz_atom_new(struct zz_ast* a, \
+              struct zz_ast* zz_atom(struct zz_ast_mgr* a, \
               const char* type, const char* str)
 
    Construct new atom
 
-.. function:: int zz_is_atom(struct zz_node* n)
+.. function:: int zz_is_atom(struct zz_ast* n)
 
    Return :data:`1` if :data:`n` is an atom, :data:`0` otherwise
 
-.. function:: struct zz_atom* zz_atom(struct zz_node* n)
+.. function:: struct zz_atom* zz_to_atom(struct zz_ast* n)
 
    Return :data:`n` cast to :type:`zz_atom`, or :data:`NULL`
 

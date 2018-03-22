@@ -20,7 +20,7 @@ Doubly-linked list node head for memory management
 -------------------------------- ------------------------------------------
 **Related functions**
 ---------------------------------------------------------------------------
-:func:`zz_blob_new()`            construct
+:func:`zz_blob()`                construct
 :func:`zz_blob_destroy()`        delete
 :func:`zz_blob_empty()`          check for neighbours
 :func:`zz_blob_link()`           attach to neighbours
@@ -35,7 +35,7 @@ Doubly-linked list node head for memory management
 
    Pointer to the previous allocated blob.
 
-.. function:: struct zz_blob* zz_blob_new(int size)
+.. function:: struct zz_blob* zz_blob(int size)
 
    Create new blob with space for size bytes.
 

@@ -21,11 +21,11 @@ class Application {
  public:
         Application()
         {
-                zz_ast_init(&ast);
+                zz_ast_mgr_init(&ast);
         }
         ~Application()
         {
-                zz_ast_deinit(&ast);
+                zz_ast_mgr_deinit(&ast);
         }
 
         void operator()(int argc, char* argv[])
@@ -55,25 +55,25 @@ class Application {
                 }
         }
  private:
-        struct zz_ast ast;
+        struct zz_ast_mgr ast;
         const char *p;
 
         void evaluate(const std::string& line)
         {
                 try {
                         p = line.data();
-                        struct zz_node *r;
+                        struct zz_ast *r;
                         while (r = parse_atom()) {
                                 zz_print(r, stdout);
                                 fputc('\n', stdout);
-                                zz_ast_gc(&ast, r);
+                                zz_ast_mgr_gc(&ast, r);
                         }
                 } catch (std::exception &ex) {
                         std::cerr << ex.what() << "\n";
                 }
         }
 
-        struct zz_node *parse_atom()
+        struct zz_ast *parse_atom()
         {
                 while (isspace(*p))
                         ++p;
@@ -102,10 +102,10 @@ class Application {
                 const char *begin = p + 1;
                 const char *end = strchr(begin, '"');
                 p = end + 1;
-                return zz_atom_new_with_len(&ast, tok, begin, end - begin);
+                return zz_atom_with_len(&ast, tok, begin, end - begin);
         }
 
-        struct zz_node *parse_list()
+        struct zz_ast *parse_list()
         {
                 while (isspace(*p))
                         ++p;
@@ -116,8 +116,8 @@ class Application {
                         ++p;
                         return NULL;
                 }
-                struct zz_node *n = parse_atom();
-                return zz_pair_new(&ast, n, parse_list());
+                struct zz_ast *n = parse_atom();
+                return zz_pair(&ast, n, parse_list());
         }
 };
 

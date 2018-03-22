@@ -7,7 +7,7 @@ struct zz_blob {
         struct zz_blob *next, *prev;
 };
 
-struct zz_blob *zz_blob_new(int size)
+struct zz_blob *zz_blob(int size)
 {
         struct zz_blob *node = malloc(sizeof(*node) + size);
         node->next = node;
@@ -41,28 +41,28 @@ void zz_blob_unlink(struct zz_blob *node)
         node->prev->next = node->next;
 }
 
-void zz_ast_init(struct zz_ast* a)
+void zz_ast_mgr_init(struct zz_ast_mgr* a)
 {
-        a->blobs = zz_blob_new(0);
+        a->blobs = zz_blob(0);
 }
-void zz_ast_deinit(struct zz_ast *a)
+void zz_ast_mgr_deinit(struct zz_ast_mgr *a)
 {
         zz_blob_destroy(a->blobs);
 }
-void *zz_ast_alloc(struct zz_ast* a, int size)
+void *zz_ast_mgr_alloc(struct zz_ast_mgr* a, int size)
 {
-        struct zz_blob *b = zz_blob_new(size);
+        struct zz_blob *b = zz_blob(size);
         zz_blob_link(b, a->blobs);
         return (void *)(b + 1);
 }
-void zz_ast_gc(struct zz_ast *a, struct zz_node *root)
+void zz_ast_mgr_gc(struct zz_ast_mgr *a, struct zz_ast *root)
 {
         if (zz_blob_empty(a->blobs))
                 return;
 
         struct zz_blob *white = a->blobs;
-        struct zz_blob *gray = zz_blob_new(0);
-        struct zz_blob *black = zz_blob_new(0);
+        struct zz_blob *gray = zz_blob(0);
+        struct zz_blob *black = zz_blob(0);
 
         {
                 struct zz_blob *b = (struct zz_blob *)root - 1;
@@ -73,9 +73,9 @@ void zz_ast_gc(struct zz_ast *a, struct zz_node *root)
         while (!zz_blob_empty(gray)) {
                 struct zz_blob *b = gray->next;
                 zz_blob_unlink(b);
-                struct zz_node *n = (void *)(b + 1);
+                struct zz_ast *n = (void *)(b + 1);
                 if (zz_is_pair(n)) {
-                        struct zz_pair *p = zz_pair(n);
+                        struct zz_pair *p = zz_to_pair(n);
                         if (p->data) {
                                 struct zz_blob *c = (struct zz_blob *)p->data - 1;
                                 zz_blob_unlink(c);
@@ -95,71 +95,70 @@ void zz_ast_gc(struct zz_ast *a, struct zz_node *root)
         a->blobs = black;
 }
 
-struct zz_node *zz_pair_new(struct zz_ast *a,
-                struct zz_node *data, struct zz_node *next)
+struct zz_ast *zz_pair(struct zz_ast_mgr *a, struct zz_ast *data,
+                struct zz_ast *next)
 {
-        struct zz_pair *n = zz_ast_alloc(a, sizeof(*n));
+        struct zz_pair *n = zz_ast_mgr_alloc(a, sizeof(*n));
         n->type = ZZ_PAIR;
         n->data = data;
         n->next = next;
         return (void *)n;
 }
-int zz_is_pair(struct zz_node *n)
+int zz_is_pair(struct zz_ast *n)
 {
         return n != NULL && n->type == ZZ_PAIR;
 }
-struct zz_pair *zz_pair(struct zz_node *n)
+struct zz_pair *zz_to_pair(struct zz_ast *n)
 {
         return zz_is_pair(n) ? (void *)n : NULL;
 }
 
-struct zz_node *zz_atom_new_with_len(struct zz_ast *a,
-                const char *type, const char *str, int len)
+struct zz_ast *zz_atom_with_len(struct zz_ast_mgr *a, const char *type,
+                const char *str, int len)
 {
-        struct zz_atom *n = zz_ast_alloc(a, sizeof(*n) + len + 1);
+        struct zz_atom *n = zz_ast_mgr_alloc(a, sizeof(*n) + len + 1);
         n->type = type;
         memcpy(n->str, str, len);
         n->str[len] = 0;
         return (void *)n;
 }
-struct zz_node *zz_atom_new(struct zz_ast *a, const char *type,
-                const char *str)
+struct zz_ast *zz_atom(struct zz_ast_mgr *a, const char *type, const char *str)
 {
-        return zz_atom_new_with_len(a, type, str, strlen(str));
+        return zz_atom_with_len(a, type, str, strlen(str));
 }
-int zz_is_atom(struct zz_node *n)
+int zz_is_atom(struct zz_ast *n)
 {
         return n != NULL && n->type != ZZ_PAIR;
 }
-struct zz_atom *zz_atom(struct zz_node *n)
+struct zz_atom *zz_to_atom(struct zz_ast *n)
 {
         return zz_is_atom(n) ? (void *)n : NULL;
 }
 
-struct zz_node *zz_list_append(struct zz_ast *a,
-                struct zz_node *head, struct zz_node *x)
+struct zz_ast *zz_list_append(struct zz_ast_mgr *a,
+                struct zz_ast *head, struct zz_ast *x)
 {
         if (head == NULL)
-                return zz_pair_new(a, x, NULL);
-        struct zz_pair *i = zz_pair(head);
+                return zz_pair(a, x, NULL);
+        struct zz_pair *i = zz_to_pair(head);
         while (i->next)
-                i = zz_pair(i->next);
-        i->next = zz_pair_new(a, x, NULL);
+                i = zz_to_pair(i->next);
+        i->next = zz_pair(a, x, NULL);
         return head;
 }
-struct zz_node *zz_list_prepend(struct zz_ast *a,
-                struct zz_node *head, struct zz_node *x)
+struct zz_ast *zz_list_prepend(struct zz_ast_mgr *a,
+                struct zz_ast *head, struct zz_ast *x)
 {
-        return zz_pair_new(a, x, head);
+        return zz_pair(a, x, head);
 }
 
-int zz_print(struct zz_node *n, FILE *f)
+int zz_print(struct zz_ast *n, FILE *f)
 {
         if (n == NULL) {
                 return fprintf(f, "()");
         } else if (n->type == ZZ_PAIR) {
                 int ret = fprintf(f, "(");
-                struct zz_node *x;
+                struct zz_ast *x;
                 int first = 1;
                 zz_foreach(x, n) {
                         if (first)
@@ -170,6 +169,6 @@ int zz_print(struct zz_node *n, FILE *f)
                 }
                 return ret + fprintf(f, ")");
         } else {
-                return fprintf(f, "%s:\"%s\"", n->type, zz_atom(n)->str);
+                return fprintf(f, "%s:\"%s\"", n->type, zz_to_atom(n)->str);
         }
 }
