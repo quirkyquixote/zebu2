@@ -8,3 +8,11 @@ all:
 .PHONY: clean
 clean:
 	$(call descend,src,clean)
+
+.PHONY: doc
+doc:
+	$(call descend,doc,all)
+
+.PHONY: clean-doc
+clean-doc:
+	$(call descend,doc,clean)
