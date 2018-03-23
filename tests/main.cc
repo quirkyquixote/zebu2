@@ -10,7 +10,7 @@
 #include "readline/history.h"
 
 extern "C" {
-#include "zebu.h"
+#include "zebu2.h"
 };
 
 static const char *ZZ_NUMBER = "number";

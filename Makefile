@@ -9,6 +9,14 @@ all:
 clean:
 	$(call descend,src,clean)
 
+.PHONY: install
+install:
+	$(call descend,src,install)
+
+.PHONY: uninstall
+uninstall:
+	$(call descend,src,uninstall)
+
 .PHONY: test
 test:
 	$(call descend,tests,all)

@@ -1,5 +1,5 @@
 
-#include "zebu.h"
+#include "zebu2.h"
 
 const char *ZZ_PAIR = "pair";
 

@@ -10,7 +10,7 @@ VERSION := 2.0.0
 # Determine where we are going to install things
 
 prefix := /usr/local
-suffix := $(shell echo $(VERSION) | grep -o '^[0-9]*\.[0-9]*')
+suffix := $(shell echo $(VERSION) | grep -o '^[0-9]*')
 bindir := $(prefix)/bin
 libdir := $(prefix)/lib
 datadir := $(prefix)/share/zebu$(suffix)
@@ -24,9 +24,6 @@ localstatedir := $(prefix)/var/zebu
 CC ?= cc
 CXX ?= c++
 AR ?= ar
-FLEX ?= flex
-BISON ?= bison
-SWIG ?= swig
 INSTALL ?= install
 INSTALL_PROGRAM := $(INSTALL)
 INSTALL_DATA := $(INSTALL) -m 644
@@ -80,9 +77,6 @@ ifneq ($(findstring s,$(filter-out --%,$(MAKEFLAGS))),)
     QUIET_CXX = @echo CXX $@;
     QUIET_LINK = @echo LINK $@;
     QUIET_AR = @echo AR $@;
-    QUIET_BISON = @echo BISON $@;
-    QUIET_FLEX = @echo FLEX $@;
-    QUIET_SWIG = @echo SWIG $@;
     QUIET_GEN = @echo GEN $@;
     QUIET_UNZIP = @echo UNZIP $@;
     QUIET_INSTALL = @echo INSTALL $@;
@@ -103,15 +97,23 @@ endif
 %.a:
 	$(QUIET_AR)$(AR) rc $@ $^
 
-$(DESTDIR)$(bindir)/%: %
+%.so:
+	$(QUIET_LINK)$(CC) -shared -Wl,-soname,$@.$(version) -o $@ $^
+
+$(DESTDIR)$(bindir)/%.$(VERSION): %
 	@$(INSTALL) -d $(@D)
 	$(QUIET_INSTALL)$(INSTALL_PROGRAM) $< $@$(suffix)
-	@cd $(DESTDIR)$(bindir) && ln -f -s $*$(suffix) $*
 
-$(DESTDIR)$(libdir)/%.so: %.so
+$(DESTDIR)$(libdir)/%.$(VERSION): %
 	@$(INSTALL) -d $(@D)
-	$(QUIET_INSTALL)$(INSTALL_DATA) $< $@.$(VERSION)
-	@cd $(DESTDIR)$(libdir) && ln -s -f $<.$(VERSION) $<
+	$(QUIET_INSTALL)$(INSTALL_DATA) $< $@
+
+%.$(suffix): %.$(VERSION)
+	cd $(@D); ln -f -s $(<F) $(@F)
+
+$(DESTDIR)$(prefix)/include/%: %
+	@$(INSTALL) -d $(@D)
+	$(QUIET_INSTALL)$(INSTALL_DATA) $< $@
 
 $(DESTDIR)$(datadir)/% $(DESTDIR)$(docdir)/% $(DESTDIR)$(htmldir)/% $(DESTDIR)$(pdfdir)/%: %
 	@$(INSTALL) -d $(@D)
