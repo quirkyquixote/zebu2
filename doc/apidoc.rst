@@ -1,5 +1,5 @@
-Public API
-==========
+API Doc
+=======
 
 .. default-domain:: c
 
@@ -8,15 +8,14 @@ AST
 
 Handler for all nodes of the AST. Always handled by pointer, the actual node
 may have more fields beyond the end of this struct; if so, the type determines
-what the node can be cast to.
+what the node can be cast to; see :func:`zz_to_pair()` and :func:`zz_to_atom()`.
 
 The type string is a pointer to a :type:`const char*` that is unique for that
 node type, so two nodes are of the same type if the pointers---not the
 strings---are the same.
 
-All nodes are allocated by a :type:`zz_ast_mgr` object, that also keeps a
-record of them and is responsible for deleting the ones that aren't used
-anymore.
+All nodes are allocated with the Boehms Garbage Collector so the user doesn't
+need to keep track of them.
 
 .. type:: struct zz_ast
 
@@ -40,48 +39,6 @@ anymore.
 
    Serialize :data:`n`, and write the result to :data:`f`
 
-AST Manager
------------
-
-Manager for the full AST
-
-.. type:: struct zz_ast_mgr
-
-   Manager for the full AST
-
-============================== ============================================
-**Member fields**
----------------------------------------------------------------------------
-:member:`~zz_ast_mgr.blobs`    all allocated nodes
------------------------------- --------------------------------------------
-**Related functions**
----------------------------------------------------------------------------
-:func:`zz_ast_mgr_init()`      initialize AST manager
-:func:`zz_ast_mgr_deinit()`    deinitialize AST manager
-:func:`zz_ast_mgr_alloc()`     allocate node
-:func:`zz_ast_mgr_gc()`        run garbage collector
-============================== ============================================
-
-.. member:: void* zz_ast_mgr.blobs
-
-   All allocated nodes
-
-.. function:: void zz_ast_mgr_init(struct zz_ast_mgr* a)
-
-   Initialize AST manager.
-
-.. function:: void zz_ast_mgr_deinit(struct zz_ast_mgr* a)
-
-   Deinitialize AST manager.
-
-.. function:: void* zz_ast_mgr_alloc(struct zz_ast_mgr* a, int size)
-
-   Allocate a new and register it with the garbage collector.
-
-.. function:: void zz_ast_mgr_gc(struct zz_ast_mgr* a, struct zz_ast* root)
-
-   Destroy every allocated node that is not reachable from :data:`root`.
-
 Pair
 ----
 
@@ -98,8 +55,8 @@ element (that can be another list) and the next element.
 **Member fields**
 ---------------------------------------------------------------------------
 :member:`~zz_pair.type`        always :data:`ZZ_PAIR`
-:member:`~zz_pair.data`        pointer to the data of this cell
-:member:`~zz_pair.next`        pointer to the next element
+:member:`~zz_pair.head`        pointer to the data of this cell
+:member:`~zz_pair.tail`        pointer to the next element
 ------------------------------ --------------------------------------------
 **Related functions**
 ---------------------------------------------------------------------------
@@ -117,16 +74,15 @@ element (that can be another list) and the next element.
 
    Always :data:`ZZ_PAIR`
 
-.. member:: struct zz_ast* zz_pair.data
+.. member:: struct zz_ast* zz_pair.head
 
    Pointer to the data of this cell
 
-.. member:: struct zz_ast* zz_pair.next
+.. member:: struct zz_ast* zz_pair.tail
 
    Pointer to the next element
 
-.. function:: struct zz_ast* zz_pair(struct zz_ast_mgr* a, \
-              struct zz_ast* data, struct zz_ast* next)
+.. function:: struct zz_ast* zz_pair(struct zz_ast* head, struct zz_ast* tail)
 
    Create new pair
 
@@ -174,10 +130,8 @@ Atoms have a token type and an associated string.
 
    String for the atom
 
-.. function:: struct zz_ast* zz_atom_with_len(struct zz_ast_mgr* a, \
-             const char* type, const char* str, int len)
-              struct zz_ast* zz_atom(struct zz_ast_mgr* a, \
-              const char* type, const char* str)
+.. function:: struct zz_ast* zz_atom_with_len(const char* type, const char* str, int len)
+              struct zz_ast* zz_atom(const char* type, const char* str)
 
    Construct new atom
 

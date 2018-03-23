@@ -19,15 +19,6 @@ static const char *ZZ_SYMBOL = "symbol";
 
 class Application {
  public:
-        Application()
-        {
-                zz_ast_mgr_init(&ast);
-        }
-        ~Application()
-        {
-                zz_ast_mgr_deinit(&ast);
-        }
-
         void operator()(int argc, char* argv[])
         {
                 if (argc > 1) {
@@ -55,7 +46,6 @@ class Application {
                 }
         }
  private:
-        struct zz_ast_mgr ast;
         const char *p;
 
         void evaluate(const std::string& line)
@@ -66,7 +56,6 @@ class Application {
                         while (r = parse_atom()) {
                                 zz_print(r, stdout);
                                 fputc('\n', stdout);
-                                zz_ast_mgr_gc(&ast, r);
                         }
                 } catch (std::exception &ex) {
                         std::cerr << ex.what() << "\n";
@@ -102,7 +91,7 @@ class Application {
                 const char *begin = p + 1;
                 const char *end = strchr(begin, '"');
                 p = end + 1;
-                return zz_atom_with_len(&ast, tok, begin, end - begin);
+                return zz_atom_with_len(tok, begin, end - begin);
         }
 
         struct zz_ast *parse_list()
@@ -117,7 +106,7 @@ class Application {
                         return NULL;
                 }
                 struct zz_ast *n = parse_atom();
-                return zz_pair(&ast, n, parse_list());
+                return zz_pair(n, parse_list());
         }
 };
 

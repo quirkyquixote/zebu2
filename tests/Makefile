@@ -1,7 +1,7 @@
 
 include ../config.mk
 
-ALL_LDFLAGS += -lreadline
+ALL_LDFLAGS += -lreadline -lgc
 
 objs += .obj/main.o
 

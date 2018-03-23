@@ -13,7 +13,8 @@ Bison, hence the name and the jokeyish zz namespace.
 Requirements
 ------------
 
-Just C.
+Zebu is written en plain C, uses the Boehms Garbage Collector, and its tests
+make use of the GNU readline library.
 
 Installation
 ------------
@@ -30,8 +31,7 @@ Contents
 .. toctree::
    :maxdepth: 2
 
-   public
-   private
+   apidoc
    usage
 
 
