@@ -63,6 +63,8 @@ element (that can be another list) and the next element.
 :func:`zz_pair()`              create new pair
 :func:`zz_is_pair()`           true if a node is a pair
 :func:`zz_to_pair()`           cast node to pair
+:func:`zz_head()`              return head
+:func:`zz_tail()`              return tail
 :func:`zz_foreach()`           iterate on a list of pairs
 ============================== ============================================
 
@@ -93,6 +95,14 @@ element (that can be another list) and the next element.
 .. function:: struct zz_pair* zz_to_pair(struct zz_ast* n)
 
    Return :data:`n` cast to :type:`zz_pair`, or :data:`NULL`.
+
+.. function:: struct zz_ast* zz_head(struct zz_ast* a)
+
+   Return head if :data:`a` is pair, :data:`NULL` otherwise.
+
+.. function:: struct zz_ast* zz_tail(struct zz_ast* a)
+
+   Return tail if :data:`a` is pair, :data:`NULL` otherwise.
 
 .. function:: void zz_foreach(struct zz_ast* x, struct zz_ast* head)
 

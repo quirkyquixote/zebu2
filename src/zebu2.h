@@ -23,11 +23,11 @@ struct zz_pair {
 struct zz_ast *zz_pair(struct zz_ast *head, struct zz_ast *tail);
 int zz_is_pair(struct zz_ast *n);
 struct zz_pair *zz_to_pair(struct zz_ast *n);
+struct zz_ast* zz_head(struct zz_ast* a);
+struct zz_ast* zz_tail(struct zz_ast* a);
 
 #define zz_foreach(_x, _head) \
-for (struct zz_pair* _i = zz_to_pair(_head); \
-                _x = _i ? _i->head : NULL, _i; \
-                _i = zz_to_pair(_i->tail))
+for (struct zz_ast* _i = _head; _x = zz_head(_i), _i; _i = zz_tail(_i))
 
 struct zz_atom {
         const char *type;

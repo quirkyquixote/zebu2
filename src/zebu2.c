@@ -21,6 +21,16 @@ struct zz_pair *zz_to_pair(struct zz_ast *n)
 {
         return zz_is_pair(n) ? (void *)n : NULL;
 }
+struct zz_ast* zz_head(struct zz_ast* a)
+{
+        struct zz_pair *p = zz_to_pair(a);
+        return p == NULL ? a : p->head;
+}
+struct zz_ast* zz_tail(struct zz_ast* a)
+{
+        struct zz_pair *p = zz_to_pair(a);
+        return p == NULL ? NULL : p->tail;
+}
 
 struct zz_ast *zz_atom_with_len(const char *type, const char *str, int len)
 {
