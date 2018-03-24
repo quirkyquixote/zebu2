@@ -27,13 +27,6 @@ Declarations
     %}
 
     /*
-     * The ast is a factory for nodes, and must be passed from outside.
-     * Depending on your mode of operation, a return location for the root
-     * node may be required, too.
-     */
-    %parse-param { struct zz_ast_mgr *ast }
-
-    /*
      * At least one possible data type will be struct zz_ast; all of them may
      * be, if the lexer has access to the zz_ast_mgr object and can construct
      * nodes by itself.
@@ -72,7 +65,7 @@ Grammar Rules
             $$ = NULL;
             }
         | input line {
-            $$ = zz_pair(ast, $1, $2);
+            $$ = zz_pair($1, $2);
             }
         ;
 
@@ -87,41 +80,41 @@ Grammar Rules
 
     exp
         : NUM {
-            $$ = zz_atom(ast, TOK_NUM, $1);
+            $$ = zz_atom(TOK_NUM, $1);
             }
         | exp exp '+'     { 
-            $$ = zz_pair(ast, zz_atom(ast, TOK_ADD, ""),
-                 zz_pair(ast, $1,
-                 zz_pair(ast, $2,
+            $$ = zz_pair(zz_atom(TOK_ADD, ""),
+                 zz_pair($1,
+                 zz_pair($2,
                  NULL)));
             }
         | exp exp '-'     { 
-            $$ = zz_pair(ast, zz_atom(ast, TOK_SUB, ""),
-                 zz_pair(ast, $1,
-                 zz_pair(ast, $2,
+            $$ = zz_pair(zz_atom(TOK_SUB, ""),
+                 zz_pair($1,
+                 zz_pair($2,
                  NULL)));
             }
         | exp exp '*'     { 
-            $$ = zz_pair(ast, zz_atom(ast, TOK_MUL, ""),
-                 zz_pair(ast, $1,
-                 zz_pair(ast, $2,
+            $$ = zz_pair(zz_atom(TOK_MUL, ""),
+                 zz_pair($1,
+                 zz_pair($2,
                  NULL)));
             }
         | exp exp '/'     { 
-            $$ = zz_pair(ast, zz_atom(ast, TOK_DIV, ""),
-                 zz_pair(ast, $1,
-                 zz_pair(ast, $2,
+            $$ = zz_pair(zz_atom(TOK_DIV, ""),
+                 zz_pair($1,
+                 zz_pair($2,
                  NULL)));
             }
         | exp exp '^'     { 
-            $$ = zz_pair(ast, zz_atom(ast, TOK_EXP, ""),
-                 zz_pair(ast, $1,
-                 zz_pair(ast, $2,
+            $$ = zz_pair(zz_atom(TOK_EXP, ""),
+                 zz_pair($1,
+                 zz_pair($2,
                  NULL)));
             }
         | exp 'n'         {
-            $$ = zz_pair(ast, zz_atom(ast, TOK_NEG, ""),
-                 zz_pair(ast, $1,
+            $$ = zz_pair(zz_atom(TOK_NEG, ""),
+                 zz_pair($1,
                  NULL));
             }
         ;

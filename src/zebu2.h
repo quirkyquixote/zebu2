@@ -6,6 +6,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <gc.h>
+
 extern const char *ZZ_PAIR;
 
 struct zz_ast {

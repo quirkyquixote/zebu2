@@ -2,5 +2,9 @@
 *.d
 *.a
 *.so
-tests/test
+*.tab.c
+tests/calc
+tests/math
+tests/lisp
+tests/shon
 doc/_build

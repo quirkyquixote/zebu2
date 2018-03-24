@@ -1,8 +1,6 @@
 
 #include "zebu2.h"
 
-#include <gc.h>
-
 const char *ZZ_PAIR = "pair";
 
 struct zz_ast *zz_pair(struct zz_ast *head, struct zz_ast *tail)
@@ -84,7 +82,9 @@ int zz_print(struct zz_ast *n, FILE *f)
                         ret += zz_print(x, f);
                 }
                 return ret + fprintf(f, ")");
+        } else if (*zz_to_atom(n)->str) {
+                return fprintf(f, "<%s:%s>", n->type, zz_to_atom(n)->str);
         } else {
-                return fprintf(f, "%s:\"%s\"", n->type, zz_to_atom(n)->str);
+                return fprintf(f, "<%s>", n->type);
         }
 }
