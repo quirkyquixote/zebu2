@@ -85,6 +85,9 @@ ifneq ($(findstring s,$(filter-out --%,$(MAKEFLAGS))),)
 endif
 
 # Some generic targets that are the same for all Makefiles
+%: .obj/%.o
+	$(QUIET_CC)$(CC) $(ALL_CFLAGS) $(ALL_LDFLAGS) $^ -o $@
+
 .obj/%.o: %.c | .obj
 	$(QUIET_CC)$(CC) $(ALL_CFLAGS) -c -o $@ $<
 

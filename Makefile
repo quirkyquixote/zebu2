@@ -25,6 +25,14 @@ test:
 clean-test:
 	$(call descend,tests,clean)
 
+.PHONY: examples
+example:
+	$(call descend,examples,all)
+
+.PHONY: clean-examples
+clean-example:
+	$(call descend,examples,clean)
+
 .PHONY: doc
 doc:
 	$(call descend,doc,all)
