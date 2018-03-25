@@ -12,10 +12,10 @@ int main(int argc, char *argv[])
         a = NULL;
         assert(zz_tail(a) == NULL);
 
-        a = zz_atom("");
+        a = zz_str("");
         assert(zz_tail(a) == NULL);
 
-        a = zz_atom("this is a test");
+        a = zz_str("this is a test");
         assert(zz_tail(a) == NULL);
 
         a = zz_pair(NULL, NULL);

@@ -3,16 +3,59 @@ API Doc
 
 .. default-domain:: c
 
+AST Type
+--------
+
+Defines a type of AST with an unique associated data; holds pointers to
+functions to manipulate such data.
+
+.. type:: struct zz_type
+
+   Defines a type of AST node
+
+============================ ==============================================
+**Member fields**
+---------------------------------------------------------------------------
+:member:`~zz_type.serialize` prints to :type:`FILE`
+---------------------------- ----------------------------------------------
+**Related functions**
+---------------------------------------------------------------------------
+:func:`zz_pair_type()`       returns type for pair nodes
+:func:`zz_int_type()`        returns type for atom nodes holding integes
+:func:`zz_ptr_type()`        returns type for atom nodes holding pointers
+:func:`zz_str_type()`        returns type for atom nodes holding strings
+============================ ==============================================
+
+.. member:: int zz_type.serialize(struct zz_ast* a, FILE* f)
+
+   Print :data:`a` to :data:`f`, return number of characters.
+
+.. function:: const struct zz_type* zz_pair_type(void)
+
+   Return type for pair nodes.
+
+.. function:: const struct zz_type* zz_int_type(void)
+
+   Return type for atomic nodes holding integers.
+
+.. function:: const struct zz_type* zz_ptr_type(void)
+
+   Return type for atomic nodes holding pointers.
+
+.. function:: const struct zz_type* zz_str_type(void)
+
+   Return type for atomic nodes holding strings.
+
 AST
 ---
 
 Handler for all nodes of the AST. Always handled by pointer, the actual node
 may have more fields beyond the end of this struct; if so, the type determines
-what the node can be cast to; see :func:`zz_to_pair()` and :func:`zz_to_atom()`.
+what the node can be cast to; see :func:`zz_to_pair()`, :func:`zz_to_int()`,
+:func:`zz_to_ptr()`, and :func:`zz_to_str()`.
 
-The type string is a pointer to a :type:`const char*` that is unique for that
-node type, so two nodes are of the same type if the pointers---not the
-strings---are the same.
+The type field poinst of a :type:`const struct zz_type` that determines the
+actual node payload, and how to handle it.
 
 All nodes are allocated with the Boehms Garbage Collector so the user doesn't
 need to keep track of them.
@@ -31,7 +74,7 @@ need to keep track of them.
 :func:`zz_print()`           serialize a node
 ============================ ==============================================
 
-.. member:: const char* zz_ast.type
+.. member:: const struct zz_type* zz_ast.type
 
    A const string, doubles as type name
 
@@ -54,7 +97,7 @@ element (that can be another list) and the next element.
 ============================== ============================================
 **Member fields**
 ---------------------------------------------------------------------------
-:member:`~zz_pair.type`        always :data:`ZZ_PAIR`
+:member:`~zz_pair.type`        always :func:`zz_pair_type()`
 :member:`~zz_pair.head`        pointer to the data of this cell
 :member:`~zz_pair.tail`        pointer to the next element
 ------------------------------ --------------------------------------------
@@ -68,13 +111,9 @@ element (that can be another list) and the next element.
 :func:`zz_foreach()`           iterate on a list of pairs
 ============================== ============================================
 
-.. var:: const char* ZZ_PAIR
+.. member:: const struct zz_type* zz_pair.type
 
-   Name and type of all list nodes.
-
-.. member:: const char* zz_pair.type
-
-   Always :data:`ZZ_PAIR`
+   Always :func:`zz_pair_type()`.
 
 .. member:: struct zz_ast* zz_pair.head
 
@@ -108,48 +147,130 @@ element (that can be another list) and the next element.
 
    Iterate on a list of pairs.
 
-Atom
-----
+Integer
+-------
 
-An atomic element in the AST
+Integers hold data of type :type:`int`.
 
-Atoms have a token type and an associated string.
-
-.. type:: struct zz_atom
+.. type:: struct zz_int
 
    Leaf in the AST
 
 ============================== ============================================
 **Member fields**
 ---------------------------------------------------------------------------
-:member:`~zz_atom.type`        never :data:`ZZ_PAIR`
-:member:`~zz_atom.str`         string
+:member:`~zz_int.type`         always :func:`zz_int_type()`
+:member:`~zz_int.num`          integer
 ------------------------------ --------------------------------------------
 **Related functions**
 ---------------------------------------------------------------------------
-:func:`zz_atom()`              create new atom
-:func:`zz_is_atom()`           true if a node is a atom
-:func:`zz_to_atom()`           cast node to atom
+:func:`zz_int()`               create new integer
+:func:`zz_is_int()`            true if a node is a integer
+:func:`zz_to_int()`            cast node to integer
 ============================== ============================================
 
-.. member:: const char* zz_atom.type
+.. member:: const struct zz_type* zz_int.type
 
-   Anything but :data:`ZZ_PAIR`. Each user must provide their own token types.
+   Always :func:`zz_int_type()`.
 
-.. member:: char[] zz_atom.str
+.. member:: int zz_int.num
 
-   String for the atom
+   Integer data
 
-.. function:: struct zz_ast* zz_atom_with_len(const char* type, const char* str, int len)
-              struct zz_ast* zz_atom(const char* type, const char* str)
+.. function:: struct zz_ast* zz_int(int num)
 
-   Construct new atom
+   Construct new integer
 
-.. function:: int zz_is_atom(struct zz_ast* n)
+.. function:: int zz_is_int(struct zz_ast* n)
 
-   Return :data:`1` if :data:`n` is an atom, :data:`0` otherwise
+   Return :data:`1` if :data:`n` is an integer, :data:`0` otherwise
 
-.. function:: struct zz_atom* zz_to_atom(struct zz_ast* n)
+.. function:: struct zz_int* zz_to_int(struct zz_ast* n)
 
-   Return :data:`n` cast to :type:`zz_atom`, or :data:`NULL`
+   Return :data:`n` cast to :type:`zz_int`, or :data:`NULL`
+
+Pointer
+-------
+
+Pointers hold data of type :type:`void*`
+
+.. type:: ptruct zz_ptr
+
+   Leaf in the AST
+
+============================== ============================================
+**Member fields**
+---------------------------------------------------------------------------
+:member:`~zz_ptr.type`         always :func:`zz_ptr_type()`
+:member:`~zz_ptr.ptr`          pointer
+------------------------------ --------------------------------------------
+**Related functions**
+---------------------------------------------------------------------------
+:func:`zz_ptr()`               create new pointer
+:func:`zz_is_ptr()`            true if a node is a pointer
+:func:`zz_to_ptr()`            cast node to pointer
+============================== ============================================
+
+.. member:: const struct zz_type* zz_ptr.type
+
+   Always :func:`zz_ptr_type()`.
+
+.. member:: void* zz_ptr.ptr
+
+   Pointer data
+
+.. function:: struct zz_ast* zz_ptr(void* ptr)
+
+   Conptruct new pointer
+
+.. function:: int zz_is_ptr(ptruct zz_ast* n)
+
+   Return :data:`1` if :data:`n` is an pointer, :data:`0` otherwise
+
+.. function:: ptruct zz_ptr* zz_to_ptr(ptruct zz_ast* n)
+
+   Return :data:`n` cast to :type:`zz_ptr`, or :data:`NULL`
+
+String
+------
+
+Strings hold a null-terminated byte array.
+
+.. type:: struct zz_str
+
+   Leaf in the AST
+
+============================== ============================================
+**Member fields**
+---------------------------------------------------------------------------
+:member:`~zz_str.type`         always :func:`zz_str_type()`
+:member:`~zz_str.str`          string
+------------------------------ --------------------------------------------
+**Related functions**
+---------------------------------------------------------------------------
+:func:`zz_str()`               create new string
+:func:`zz_is_str()`            true if a node is a string
+:func:`zz_to_str()`            cast node to string
+============================== ============================================
+
+.. member:: const struct zz_type* zz_str.type
+
+   Always :func:`zz_str_type()`.
+
+.. member:: char[] zz_str.str
+
+   Null-terminated byte array.
+
+.. function:: struct zz_ast* zz_str_with_len(const char* str, int len)
+              struct zz_ast* zz_str(const char* str)
+
+   Construct new string
+
+.. function:: int zz_is_str(struct zz_ast* n)
+
+   Return :data:`1` if :data:`n` is an string, :data:`0` otherwise
+
+.. function:: struct zz_str* zz_to_str(struct zz_ast* n)
+
+   Return :data:`n` cast to :type:`zz_str`, or :data:`NULL`
 

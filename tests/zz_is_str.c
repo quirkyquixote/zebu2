@@ -9,12 +9,12 @@ int main(int argc, char *argv[])
 
         struct zz_ast *a;
 
-        a = zz_atom("");
-        assert(zz_is_atom(a));
+        a = zz_str("");
+        assert(zz_is_str(a));
 
-        a = zz_atom("this is a test");
-        assert(zz_is_atom(a));
+        a = zz_str("this is a test");
+        assert(zz_is_str(a));
 
         a = zz_pair(NULL, NULL);
-        assert(!zz_is_atom(a));
+        assert(!zz_is_str(a));
 }

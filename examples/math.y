@@ -3,6 +3,53 @@
 
 int yylex(const char **ptr);
 
+typedef int (operator)(struct zz_ast*);
+
+int eval(struct zz_ast *a)
+{
+        if (zz_is_int(a)) {
+                return zz_to_int(a)->num;
+        } else if (zz_is_pair(a)) {
+                operator *op = zz_to_ptr(zz_head(a))->ptr;
+                return op(zz_tail(a));
+        } else {
+                abort();
+        }
+}
+
+int op_set(struct zz_ast *a)
+{
+        return eval(zz_head(zz_tail(a)));
+}
+int op_add(struct zz_ast *a)
+{
+        return eval(zz_head(a)) + eval(zz_head(zz_tail(a)));
+}
+int op_sub(struct zz_ast *a)
+{
+        return eval(zz_head(a)) - eval(zz_head(zz_tail(a)));
+}
+int op_mul(struct zz_ast *a)
+{
+        return eval(zz_head(a)) * eval(zz_head(zz_tail(a)));
+}
+int op_div(struct zz_ast *a)
+{
+        return eval(zz_head(a)) / eval(zz_head(zz_tail(a)));
+}
+int op_mod(struct zz_ast *a)
+{
+        return eval(zz_head(a)) % eval(zz_head(zz_tail(a)));
+}
+int op_exp(struct zz_ast *a)
+{
+        return eval(zz_head(a)) * eval(zz_head(zz_tail(a)));
+}
+int op_neg(struct zz_ast *a)
+{
+        return -eval(zz_head(a));
+}
+
 %}
 
 %param {const char **ptr}
@@ -45,7 +92,7 @@ input
 line
     : expression {
         zz_print($1, stdout);
-        fputc('\n', stdout);
+        fprintf(stdout, " = %d\n", eval($1));
         }
     |
     ;
@@ -64,7 +111,7 @@ assignment_expression
     ;
 
 assignment_operator
-    : '=' { $$ = zz_atom("set"); }
+    : '=' { $$ = zz_ptr(op_set); }
     ;
 
 additive_expression
@@ -77,8 +124,8 @@ additive_expression
     ;
 
 additive_operator
-    : '+' { $$ = zz_atom("add"); }
-    | '-' { $$ = zz_atom("sub"); }
+    : '+' { $$ = zz_ptr(op_add); }
+    | '-' { $$ = zz_ptr(op_sub); }
     ;
 
 multiplicative_expression
@@ -91,10 +138,10 @@ multiplicative_expression
     ;
 
 multiplicative_operator
-    : '*' { $$ = zz_atom("mul"); }
-    | '/' { $$ = zz_atom("div"); }
-    | '%' { $$ = zz_atom("mod"); }
-    | '^' { $$ = zz_atom("exp"); }
+    : '*' { $$ = zz_ptr(op_mul); }
+    | '/' { $$ = zz_ptr(op_div); }
+    | '%' { $$ = zz_ptr(op_mod); }
+    | '^' { $$ = zz_ptr(op_exp); }
     ;
 
 atomic_expression
@@ -120,17 +167,11 @@ int yylex(const char **ptr)
                         do
                                 ++(*ptr);
                         while (isalnum(*(*ptr)) || *(*ptr) == '_');
-                        yylval.ast = zz_atom_with_len(begin, (*ptr) - begin);
+                        yylval.ast = zz_str_with_len(begin, (*ptr) - begin);
                 }
                 return ATOM;
          case '0'...'9':
-                {
-                        const char *begin = (*ptr);
-                        do
-                                ++(*ptr);
-                        while (isdigit(*(*ptr)));
-                        yylval.ast = zz_atom_with_len(begin, (*ptr) - begin);
-                }
+                yylval.ast = zz_int(strtol(*ptr, (char**)ptr, 10));
                 return ATOM;
          case 0:
                 return 0;

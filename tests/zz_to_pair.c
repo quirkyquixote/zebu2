@@ -9,10 +9,10 @@ int main(int argc, char *argv[])
 
         struct zz_pair *a;
 
-        a = zz_to_pair(zz_atom(""));
+        a = zz_to_pair(zz_str(""));
         assert(a == NULL);
 
-        a = zz_to_pair(zz_atom("this is a test"));
+        a = zz_to_pair(zz_str("this is a test"));
         assert(a == NULL);
 
         a = zz_to_pair(zz_pair(NULL, NULL));

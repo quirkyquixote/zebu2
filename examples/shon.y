@@ -100,7 +100,7 @@ assignment_expression
     ;
 
 assignment_operator
-    : '=' { $$ = zz_atom("set"); }
+    : '=' { $$ = zz_str("set"); }
     ;
 
 comparative_expression
@@ -113,12 +113,12 @@ comparative_expression
     ;
 
 comparative_operator
-    : '>' { $$ = zz_atom("gt"); }
-    | '<' { $$ = zz_atom("lt"); }
-    | OP_EQ { $$ = zz_atom("eq"); }
-    | OP_NE { $$ = zz_atom("ne"); }
-    | OP_GE { $$ = zz_atom("ge"); }
-    | OP_LE { $$ = zz_atom("le"); }
+    : '>' { $$ = zz_str("gt"); }
+    | '<' { $$ = zz_str("lt"); }
+    | OP_EQ { $$ = zz_str("eq"); }
+    | OP_NE { $$ = zz_str("ne"); }
+    | OP_GE { $$ = zz_str("ge"); }
+    | OP_LE { $$ = zz_str("le"); }
     ;
 
 additive_expression
@@ -131,8 +131,8 @@ additive_expression
     ;
 
 additive_operator
-    : '+' { $$ = zz_atom("add"); }
-    | '-' { $$ = zz_atom("sub"); }
+    : '+' { $$ = zz_str("add"); }
+    | '-' { $$ = zz_str("sub"); }
     ;
 
 multiplicative_expression
@@ -145,9 +145,9 @@ multiplicative_expression
     ;
 
 multiplicative_operator
-    : '*' { $$ = zz_atom("mul"); }
-    | '/' { $$ = zz_atom("div"); }
-    | '%' { $$ = zz_atom("mod"); }
+    : '*' { $$ = zz_str("mul"); }
+    | '/' { $$ = zz_str("div"); }
+    | '%' { $$ = zz_str("mod"); }
     ;
 
 exponential_expression
@@ -160,7 +160,7 @@ exponential_expression
     ;
 
 exponential_operator
-    : '^' { $$ = zz_atom("exp"); }
+    : '^' { $$ = zz_str("exp"); }
     ;
 
 atomic_expression
@@ -183,23 +183,21 @@ int yylex(const char **ptr)
                         const char *begin = (*ptr)++;
                         while (isalnum(**ptr) || **ptr == '_')
                                 ++*ptr;
-                        yylval.ast = zz_atom_with_len(begin, *ptr - begin);
+                        yylval.ast = zz_str_with_len(begin, *ptr - begin);
                 }
                 return ATOM;
          case '0'...'9':
-                {
-                        const char *begin = (*ptr)++;
-                        while (isdigit(**ptr))
-                                ++*ptr;
-                        yylval.ast = zz_atom_with_len(begin, *ptr - begin);
-                }
+                yylval.ast = zz_int(strtol(*ptr, (char **)ptr, 10));
                 return ATOM;
          case '"':
                 {
                         const char *begin = ++*ptr;
-                        while (**ptr != '"' && **ptr != 0)
-                                ++*ptr;
-                        yylval.ast = zz_atom_with_len(begin, *ptr - begin);
+                        *ptr = strchr(*ptr, '"');
+                        if (*ptr == NULL) {
+                                fprintf(stderr, "Unterminated string\n");
+                                abort();
+                        }
+                        yylval.ast = zz_str_with_len(begin, *ptr - begin);
                         ++*ptr;
                 }
                 return ATOM;

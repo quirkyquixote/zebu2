@@ -4,6 +4,49 @@
 
 int yylex(const char **ptr);
 
+typedef int (operator)(struct zz_ast*);
+
+int eval(struct zz_ast *a)
+{
+        if (zz_is_int(a)) {
+                return zz_to_int(a)->num;
+        } else if (zz_is_pair(a)) {
+                operator *op = zz_to_ptr(zz_head(a))->ptr;
+                return op(zz_tail(a));
+        } else {
+                abort();
+        }
+}
+
+int op_add(struct zz_ast *a)
+{
+        return eval(zz_head(a)) + eval(zz_head(zz_tail(a)));
+}
+int op_sub(struct zz_ast *a)
+{
+        return eval(zz_head(a)) - eval(zz_head(zz_tail(a)));
+}
+int op_mul(struct zz_ast *a)
+{
+        return eval(zz_head(a)) * eval(zz_head(zz_tail(a)));
+}
+int op_div(struct zz_ast *a)
+{
+        return eval(zz_head(a)) / eval(zz_head(zz_tail(a)));
+}
+int op_mod(struct zz_ast *a)
+{
+        return eval(zz_head(a)) % eval(zz_head(zz_tail(a)));
+}
+int op_exp(struct zz_ast *a)
+{
+        return eval(zz_head(a)) * eval(zz_head(zz_tail(a)));
+}
+int op_neg(struct zz_ast *a)
+{
+        return -eval(zz_head(a));
+}
+
 %}
 
 %param {const char **ptr}
@@ -36,7 +79,7 @@ input
 line
     : exp {
         zz_print($1, stdout);
-        fputc('\n', stdout);
+        fprintf(stdout, " = %d\n", eval($1));
         }
     | 
     ;
@@ -45,40 +88,23 @@ exp
     : NUM {
         $$ = $1;
         }
-    | exp exp '+'     { 
-        $$ = zz_pair(zz_atom("add"),
-             zz_pair($1,
-             zz_pair($2,
-             NULL)));
+    | exp exp '+' { 
+        $$ = zz_pair(zz_ptr(op_add), zz_pair($1, zz_pair($2, NULL)));
         }
-    | exp exp '-'     { 
-        $$ = zz_pair(zz_atom("sub"),
-             zz_pair($1,
-             zz_pair($2,
-             NULL)));
+    | exp exp '-' { 
+        $$ = zz_pair(zz_ptr(op_sub), zz_pair($1, zz_pair($2, NULL)));
         }
-    | exp exp '*'     { 
-        $$ = zz_pair(zz_atom("mul"),
-             zz_pair($1,
-             zz_pair($2,
-             NULL)));
+    | exp exp '*' { 
+        $$ = zz_pair(zz_ptr(op_mul), zz_pair($1, zz_pair($2, NULL)));
         }
-    | exp exp '/'     { 
-        $$ = zz_pair(zz_atom("div"),
-             zz_pair($1,
-             zz_pair($2,
-             NULL)));
+    | exp exp '/' { 
+        $$ = zz_pair(zz_ptr(op_div), zz_pair($1, zz_pair($2, NULL)));
         }
-    | exp exp '^'     { 
-        $$ = zz_pair(zz_atom("exp"),
-             zz_pair($1,
-             zz_pair($2,
-             NULL)));
+    | exp exp '^' { 
+        $$ = zz_pair(zz_ptr(op_exp), zz_pair($1, zz_pair($2, NULL)));
         }
-    | exp 'n'         {
-        $$ = zz_pair(zz_atom("neg"),
-             zz_pair($1,
-             NULL));
+    | exp 'n' {
+        $$ = zz_pair(zz_ptr(op_neg), zz_pair($1, NULL));
         }
     ;
 
@@ -93,12 +119,7 @@ int yylex(const char **ptr)
 
         switch (*(*ptr)) {
          case '0'...'9':
-                {
-                        const char *begin = (*ptr)++;
-                        while (isdigit(*(*ptr)))
-                                ++(*ptr);
-                        yylval.ast = zz_atom_with_len(begin, (*ptr) - begin);
-                }
+                yylval.ast = zz_int(strtol(*ptr, (char **)ptr, 10));
                 return NUM;
          case 0:
                 return 0;

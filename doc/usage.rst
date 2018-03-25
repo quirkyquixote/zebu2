@@ -80,40 +80,40 @@ Grammar Rules
 
     exp
         : NUM {
-            $$ = zz_atom(TOK_NUM, $1);
+            $$ = zz_str(TOK_NUM, $1);
             }
         | exp exp '+'     { 
-            $$ = zz_pair(zz_atom(TOK_ADD, ""),
+            $$ = zz_pair(zz_str(TOK_ADD, ""),
                  zz_pair($1,
                  zz_pair($2,
                  NULL)));
             }
         | exp exp '-'     { 
-            $$ = zz_pair(zz_atom(TOK_SUB, ""),
+            $$ = zz_pair(zz_str(TOK_SUB, ""),
                  zz_pair($1,
                  zz_pair($2,
                  NULL)));
             }
         | exp exp '*'     { 
-            $$ = zz_pair(zz_atom(TOK_MUL, ""),
+            $$ = zz_pair(zz_str(TOK_MUL, ""),
                  zz_pair($1,
                  zz_pair($2,
                  NULL)));
             }
         | exp exp '/'     { 
-            $$ = zz_pair(zz_atom(TOK_DIV, ""),
+            $$ = zz_pair(zz_str(TOK_DIV, ""),
                  zz_pair($1,
                  zz_pair($2,
                  NULL)));
             }
         | exp exp '^'     { 
-            $$ = zz_pair(zz_atom(TOK_EXP, ""),
+            $$ = zz_pair(zz_str(TOK_EXP, ""),
                  zz_pair($1,
                  zz_pair($2,
                  NULL)));
             }
         | exp 'n'         {
-            $$ = zz_pair(zz_atom(TOK_NEG, ""),
+            $$ = zz_pair(zz_str(TOK_NEG, ""),
                  zz_pair($1,
                  NULL));
             }

@@ -41,7 +41,7 @@ line
 
 expr
    : '(' list ')' { $$ = $2; }
-   | '\'' expr { $$ = zz_pair(zz_atom("quote"), zz_pair($2, NULL)); }
+   | '\'' expr { $$ = zz_pair(zz_str("quote"), zz_pair($2, NULL)); }
    | ATOM { $$ = $1; }
    ;
 
@@ -68,23 +68,19 @@ int yylex(const char **ptr)
          case '\'':
                 return *((*ptr)++);
          case '0'...'9':
-                {
-                        const char *begin = (*ptr);
-                        do
-                                ++(*ptr);
-                        while (isdigit(*(*ptr)));
-                        yylval.ast = zz_atom_with_len(begin, (*ptr) - begin);
-                }
+                yylval.ast = zz_int(strtol(*ptr, (char **)ptr, 10));
                 return ATOM;
          case '"':
                 {
-                        const char *begin = ++(*ptr);
-                        do
-                                ++(*ptr);
-                        while (*(*ptr) != '"' && *(*ptr) != '\0');
-                        yylval.ast = zz_atom_with_len(begin, (*ptr) - begin);
+                        const char *begin = ++*ptr;
+                        *ptr = strchr(*ptr, '"');
+                        if (*ptr == NULL) {
+                                fprintf(stderr, "Unterminated string\n");
+                                abort();
+                        }
+                        yylval.ast = zz_str_with_len(begin, *ptr - begin);
+                        ++*ptr;
                 }
-                ++(*ptr);
                 return ATOM;
          default:
                 {
@@ -93,7 +89,7 @@ int yylex(const char **ptr)
                                 ++(*ptr);
                         while (!isspace(*(*ptr)) && *(*ptr) != '(' &&
                                 *(*ptr) != ')' && *(*ptr) != '\0');
-                        yylval.ast = zz_atom_with_len(begin, (*ptr) - begin);
+                        yylval.ast = zz_str_with_len(begin, (*ptr) - begin);
                 }
                 return ATOM;
         }
