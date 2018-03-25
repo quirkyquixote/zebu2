@@ -1,14 +1,6 @@
 %{
 #include "bits.h"
 
-/*
- * These are the tokens that define node types in the AST
- */
-const char *TOK_NUM = "num";
-const char *TOK_SYM = "sym";
-const char *TOK_STR = "set";
-const char *TOK_QUO = "quo";
-
 int yylex(const char **ptr);
 
 %}
@@ -49,7 +41,7 @@ line
 
 expr
    : '(' list ')' { $$ = $2; }
-   | '\'' expr { $$ = zz_pair(zz_atom(TOK_QUO, ""), zz_pair($2, NULL)); }
+   | '\'' expr { $$ = zz_pair(zz_atom("quote"), zz_pair($2, NULL)); }
    | ATOM { $$ = $1; }
    ;
 
@@ -81,7 +73,7 @@ int yylex(const char **ptr)
                         do
                                 ++(*ptr);
                         while (isdigit(*(*ptr)));
-                        yylval.ast = zz_atom_with_len(TOK_NUM, begin, (*ptr) - begin);
+                        yylval.ast = zz_atom_with_len(begin, (*ptr) - begin);
                 }
                 return ATOM;
          case '"':
@@ -90,7 +82,7 @@ int yylex(const char **ptr)
                         do
                                 ++(*ptr);
                         while (*(*ptr) != '"' && *(*ptr) != '\0');
-                        yylval.ast = zz_atom_with_len(TOK_NUM, begin, (*ptr) - begin);
+                        yylval.ast = zz_atom_with_len(begin, (*ptr) - begin);
                 }
                 ++(*ptr);
                 return ATOM;
@@ -101,7 +93,7 @@ int yylex(const char **ptr)
                                 ++(*ptr);
                         while (!isspace(*(*ptr)) && *(*ptr) != '(' &&
                                 *(*ptr) != ')' && *(*ptr) != '\0');
-                        yylval.ast = zz_atom_with_len(TOK_NUM, begin, (*ptr) - begin);
+                        yylval.ast = zz_atom_with_len(begin, (*ptr) - begin);
                 }
                 return ATOM;
         }

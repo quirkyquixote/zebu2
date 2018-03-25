@@ -3,13 +3,6 @@
 
 #include "bits.h"
 
-/*
- * These are the tokens that define node types in the AST
- */
-const char *TOK_NUM = "num";
-const char *TOK_SYM = "sym";
-const char *TOK_STR = "str";
-
 int yylex(const char **ptr);
 
 %}
@@ -107,7 +100,7 @@ assignment_expression
     ;
 
 assignment_operator
-    : '=' { $$ = zz_atom(TOK_SYM, "set"); }
+    : '=' { $$ = zz_atom("set"); }
     ;
 
 comparative_expression
@@ -120,12 +113,12 @@ comparative_expression
     ;
 
 comparative_operator
-    : '>' { $$ = zz_atom(TOK_SYM, "gt"); }
-    | '<' { $$ = zz_atom(TOK_SYM, "lt"); }
-    | OP_EQ { $$ = zz_atom(TOK_SYM, "eq"); }
-    | OP_NE { $$ = zz_atom(TOK_SYM, "ne"); }
-    | OP_GE { $$ = zz_atom(TOK_SYM, "ge"); }
-    | OP_LE { $$ = zz_atom(TOK_SYM, "le"); }
+    : '>' { $$ = zz_atom("gt"); }
+    | '<' { $$ = zz_atom("lt"); }
+    | OP_EQ { $$ = zz_atom("eq"); }
+    | OP_NE { $$ = zz_atom("ne"); }
+    | OP_GE { $$ = zz_atom("ge"); }
+    | OP_LE { $$ = zz_atom("le"); }
     ;
 
 additive_expression
@@ -138,8 +131,8 @@ additive_expression
     ;
 
 additive_operator
-    : '+' { $$ = zz_atom(TOK_SYM, "add"); }
-    | '-' { $$ = zz_atom(TOK_SYM, "sub"); }
+    : '+' { $$ = zz_atom("add"); }
+    | '-' { $$ = zz_atom("sub"); }
     ;
 
 multiplicative_expression
@@ -152,9 +145,9 @@ multiplicative_expression
     ;
 
 multiplicative_operator
-    : '*' { $$ = zz_atom(TOK_SYM, "mul"); }
-    | '/' { $$ = zz_atom(TOK_SYM, "div"); }
-    | '%' { $$ = zz_atom(TOK_SYM, "mod"); }
+    : '*' { $$ = zz_atom("mul"); }
+    | '/' { $$ = zz_atom("div"); }
+    | '%' { $$ = zz_atom("mod"); }
     ;
 
 exponential_expression
@@ -167,7 +160,7 @@ exponential_expression
     ;
 
 exponential_operator
-    : '^' { $$ = zz_atom(TOK_SYM, "exp"); }
+    : '^' { $$ = zz_atom("exp"); }
     ;
 
 atomic_expression
@@ -190,7 +183,7 @@ int yylex(const char **ptr)
                         const char *begin = (*ptr)++;
                         while (isalnum(**ptr) || **ptr == '_')
                                 ++*ptr;
-                        yylval.ast = zz_atom_with_len(TOK_SYM, begin, *ptr - begin);
+                        yylval.ast = zz_atom_with_len(begin, *ptr - begin);
                 }
                 return ATOM;
          case '0'...'9':
@@ -198,7 +191,7 @@ int yylex(const char **ptr)
                         const char *begin = (*ptr)++;
                         while (isdigit(**ptr))
                                 ++*ptr;
-                        yylval.ast = zz_atom_with_len(TOK_NUM, begin, *ptr - begin);
+                        yylval.ast = zz_atom_with_len(begin, *ptr - begin);
                 }
                 return ATOM;
          case '"':
@@ -206,7 +199,7 @@ int yylex(const char **ptr)
                         const char *begin = ++*ptr;
                         while (**ptr != '"' && **ptr != 0)
                                 ++*ptr;
-                        yylval.ast = zz_atom_with_len(TOK_STR, begin, *ptr - begin);
+                        yylval.ast = zz_atom_with_len(begin, *ptr - begin);
                         ++*ptr;
                 }
                 return ATOM;

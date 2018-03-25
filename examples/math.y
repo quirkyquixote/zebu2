@@ -1,19 +1,6 @@
 %{
 #include "bits.h"
 
-/*
- * These are the tokens that define node types in the AST
- */
-const char *TOK_NUM = "num";
-const char *TOK_SYM = "sym";
-const char *TOK_SET = "set";
-const char *TOK_ADD = "add";
-const char *TOK_SUB = "sub";
-const char *TOK_MUL = "mul";
-const char *TOK_DIV = "div";
-const char *TOK_MOD = "div";
-const char *TOK_EXP = "exp";
-
 int yylex(const char **ptr);
 
 %}
@@ -77,7 +64,7 @@ assignment_expression
     ;
 
 assignment_operator
-    : '=' { $$ = zz_atom(TOK_SET, ""); }
+    : '=' { $$ = zz_atom("set"); }
     ;
 
 additive_expression
@@ -90,8 +77,8 @@ additive_expression
     ;
 
 additive_operator
-    : '+' { $$ = zz_atom(TOK_ADD, ""); }
-    | '-' { $$ = zz_atom(TOK_SUB, ""); }
+    : '+' { $$ = zz_atom("add"); }
+    | '-' { $$ = zz_atom("sub"); }
     ;
 
 multiplicative_expression
@@ -104,10 +91,10 @@ multiplicative_expression
     ;
 
 multiplicative_operator
-    : '*' { $$ = zz_atom(TOK_MUL, ""); }
-    | '/' { $$ = zz_atom(TOK_DIV, ""); }
-    | '%' { $$ = zz_atom(TOK_MOD, ""); }
-    | '^' { $$ = zz_atom(TOK_EXP, ""); }
+    : '*' { $$ = zz_atom("mul"); }
+    | '/' { $$ = zz_atom("div"); }
+    | '%' { $$ = zz_atom("mod"); }
+    | '^' { $$ = zz_atom("exp"); }
     ;
 
 atomic_expression
@@ -133,7 +120,7 @@ int yylex(const char **ptr)
                         do
                                 ++(*ptr);
                         while (isalnum(*(*ptr)) || *(*ptr) == '_');
-                        yylval.ast = zz_atom_with_len(TOK_SYM, begin, (*ptr) - begin);
+                        yylval.ast = zz_atom_with_len(begin, (*ptr) - begin);
                 }
                 return ATOM;
          case '0'...'9':
@@ -142,7 +129,7 @@ int yylex(const char **ptr)
                         do
                                 ++(*ptr);
                         while (isdigit(*(*ptr)));
-                        yylval.ast = zz_atom_with_len(TOK_SYM, begin, (*ptr) - begin);
+                        yylval.ast = zz_atom_with_len(begin, (*ptr) - begin);
                 }
                 return ATOM;
          case 0:

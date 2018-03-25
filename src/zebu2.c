@@ -1,19 +1,50 @@
 
 #include "zebu2.h"
 
-const char *ZZ_PAIR = "pair";
+int serialize_pair(struct zz_ast *a, FILE *f)
+{
+        struct zz_pair *x = (void *)a;
+        int ret = 0;
+        if (x->head)
+                ret += zz_print(x->head, f);
+        if (x->tail) {
+                fputc(' ', f);
+                ret += x->tail->type->serialize(x->tail, f);
+        }
+        return ret;
+}
+int serialize_atom(struct zz_ast *a, FILE *f)
+{
+        struct zz_atom *x = (void *)a;
+        return fprintf(f, "%s", x->str);
+}
+
+const struct zz_type *zz_pair_type(void)
+{
+        static struct zz_type type = {
+                .serialize = serialize_pair
+        };
+        return &type;
+}
+const struct zz_type *zz_atom_type(void)
+{
+        static struct zz_type type = {
+                .serialize = serialize_atom
+        };
+        return &type;
+}
 
 struct zz_ast *zz_pair(struct zz_ast *head, struct zz_ast *tail)
 {
         struct zz_pair *n = GC_malloc(sizeof(*n));
-        n->type = ZZ_PAIR;
+        n->type = zz_pair_type();
         n->head = head;
         n->tail = tail;
         return (void *)n;
 }
 int zz_is_pair(struct zz_ast *n)
 {
-        return n != NULL && n->type == ZZ_PAIR;
+        return n != NULL && n->type == zz_pair_type();
 }
 struct zz_pair *zz_to_pair(struct zz_ast *n)
 {
@@ -30,21 +61,21 @@ struct zz_ast* zz_tail(struct zz_ast* a)
         return p == NULL ? NULL : p->tail;
 }
 
-struct zz_ast *zz_atom_with_len(const char *type, const char *str, int len)
+struct zz_ast *zz_atom_with_len(const char *str, int len)
 {
         struct zz_atom *n = GC_malloc_atomic(sizeof(*n) + len + 1);
-        n->type = type;
+        n->type = zz_atom_type();
         memcpy(n->str, str, len);
         n->str[len] = 0;
         return (void *)n;
 }
-struct zz_ast *zz_atom(const char *type, const char *str)
+struct zz_ast *zz_atom(const char *str)
 {
-        return zz_atom_with_len(type, str, strlen(str));
+        return zz_atom_with_len(str, strlen(str));
 }
 int zz_is_atom(struct zz_ast *n)
 {
-        return n != NULL && n->type != ZZ_PAIR;
+        return n != NULL && n->type == zz_atom_type();
 }
 struct zz_atom *zz_to_atom(struct zz_ast *n)
 {
@@ -68,23 +99,15 @@ struct zz_ast *zz_list_prepend(struct zz_ast *head, struct zz_ast *x)
 
 int zz_print(struct zz_ast *n, FILE *f)
 {
+        int ret = 0;
         if (n == NULL) {
-                return fprintf(f, "()");
-        } else if (n->type == ZZ_PAIR) {
-                int ret = fprintf(f, "(");
-                struct zz_ast *x;
-                int first = 1;
-                zz_foreach(x, n) {
-                        if (first)
-                                first = 0;
-                        else
-                                ret += fprintf(f, " ");
-                        ret += zz_print(x, f);
-                }
-                return ret + fprintf(f, ")");
-        } else if (*zz_to_atom(n)->str) {
-                return fprintf(f, "<%s:%s>", n->type, zz_to_atom(n)->str);
+                ret += fprintf(f, "()");
+        } else if (zz_is_pair(n)) {
+                fputc('(', f);
+                ret += n->type->serialize(n, f);
+                fputc(')', f);
         } else {
-                return fprintf(f, "<%s>", n->type);
+                ret += n->type->serialize(n, f);
         }
+        return ret;
 }

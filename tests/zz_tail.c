@@ -5,8 +5,6 @@
 
 int main(int argc, char *argv[])
 {
-        static const char *tok_a = "a";
-        static const char *tok_b = "b";
         struct zz_ast *a;
 
         GC_init();
@@ -14,10 +12,10 @@ int main(int argc, char *argv[])
         a = NULL;
         assert(zz_tail(a) == NULL);
 
-        a = zz_atom(tok_a, "");
+        a = zz_atom("");
         assert(zz_tail(a) == NULL);
 
-        a = zz_atom(tok_b, "this is a test");
+        a = zz_atom("this is a test");
         assert(zz_tail(a) == NULL);
 
         a = zz_pair(NULL, NULL);

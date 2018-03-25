@@ -2,17 +2,6 @@
 
 #include "bits.h"
 
-/*
- * These are the tokens that define node types in the AST
- */
-const char *TOK_NUM = "num";
-const char *TOK_ADD = "add";
-const char *TOK_SUB = "sub";
-const char *TOK_MUL = "mul";
-const char *TOK_DIV = "div";
-const char *TOK_EXP = "exp";
-const char *TOK_NEG = "neg";
-
 int yylex(const char **ptr);
 
 %}
@@ -57,37 +46,37 @@ exp
         $$ = $1;
         }
     | exp exp '+'     { 
-        $$ = zz_pair(zz_atom(TOK_ADD, ""),
+        $$ = zz_pair(zz_atom("add"),
              zz_pair($1,
              zz_pair($2,
              NULL)));
         }
     | exp exp '-'     { 
-        $$ = zz_pair(zz_atom(TOK_SUB, ""),
+        $$ = zz_pair(zz_atom("sub"),
              zz_pair($1,
              zz_pair($2,
              NULL)));
         }
     | exp exp '*'     { 
-        $$ = zz_pair(zz_atom(TOK_MUL, ""),
+        $$ = zz_pair(zz_atom("mul"),
              zz_pair($1,
              zz_pair($2,
              NULL)));
         }
     | exp exp '/'     { 
-        $$ = zz_pair(zz_atom(TOK_DIV, ""),
+        $$ = zz_pair(zz_atom("div"),
              zz_pair($1,
              zz_pair($2,
              NULL)));
         }
     | exp exp '^'     { 
-        $$ = zz_pair(zz_atom(TOK_EXP, ""),
+        $$ = zz_pair(zz_atom("exp"),
              zz_pair($1,
              zz_pair($2,
              NULL)));
         }
     | exp 'n'         {
-        $$ = zz_pair(zz_atom(TOK_NEG, ""),
+        $$ = zz_pair(zz_atom("neg"),
              zz_pair($1,
              NULL));
         }
@@ -108,7 +97,7 @@ int yylex(const char **ptr)
                         const char *begin = (*ptr)++;
                         while (isdigit(*(*ptr)))
                                 ++(*ptr);
-                        yylval.ast = zz_atom_with_len(TOK_NUM, begin, (*ptr) - begin);
+                        yylval.ast = zz_atom_with_len(begin, (*ptr) - begin);
                 }
                 return NUM;
          case 0:

@@ -5,15 +5,14 @@
 
 int main(int argc, char *argv[])
 {
-        static const char *tok_a = "a";
         GC_init();
 
         struct zz_ast *a;
 
-        a = zz_atom(tok_a, "");
+        a = zz_atom("");
         assert(!zz_is_pair(a));
 
-        a = zz_atom(tok_a, "this is a test");
+        a = zz_atom("this is a test");
         assert(!zz_is_pair(a));
 
         a = zz_pair(NULL, NULL);

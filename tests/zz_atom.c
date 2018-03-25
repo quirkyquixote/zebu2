@@ -5,25 +5,23 @@
 
 int main(int argc, char *argv[])
 {
-        static const char *tok_a = "a";
-        static const char *tok_b = "b";
         struct zz_atom *a;
 
         GC_init();
 
-        a = (void *)zz_atom(tok_a, "");
-        assert(a->type == tok_a);
+        a = (void *)zz_atom("");
+        assert(a->type == zz_atom_type());
         assert(strcmp(a->str, "") == 0);
 
-        a = (void *)zz_atom(tok_a, "this is a test");
-        assert(a->type == tok_a);
+        a = (void *)zz_atom("this is a test");
+        assert(a->type == zz_atom_type());
         assert(strcmp(a->str, "this is a test") == 0);
 
-        a = (void *)zz_atom(tok_b, "");
-        assert(a->type == tok_b);
+        a = (void *)zz_atom("");
+        assert(a->type == zz_atom_type());
         assert(strcmp(a->str, "") == 0);
 
-        a = (void *)zz_atom(tok_b, "this is a test");
-        assert(a->type == tok_b);
+        a = (void *)zz_atom("this is a test");
+        assert(a->type == zz_atom_type());
         assert(strcmp(a->str, "this is a test") == 0);
 }
