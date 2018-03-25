@@ -37,6 +37,3 @@ zz_foreach: .obj/zz_foreach.o $(root_dir)src/libzebu.a
 clean:
 	$(RM) $(tests)
 	$(RM) -r .obj
-	$(RM) *.tab.c
-
--include $(deps)

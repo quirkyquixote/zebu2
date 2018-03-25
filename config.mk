@@ -24,6 +24,7 @@ localstatedir := $(prefix)/var/zebu
 CC ?= cc
 CXX ?= c++
 AR ?= ar
+BISON ?= bison
 INSTALL ?= install
 INSTALL_PROGRAM := $(INSTALL)
 INSTALL_DATA := $(INSTALL) -m 644
@@ -48,9 +49,6 @@ ALL_CFLAGS += -DDATADIR=\"$(datadir)\"
 ALL_CFLAGS += -DLOCALSTATEDIR=\"$(localstatedir)\"
 ALL_CFLAGS += -MD
 ALL_CFLAGS += -fPIC
-ALL_CFLAGS += -I$(root_dir)
-ALL_CFLAGS += -I$(root_dir)/src
-
 
 ALL_CXXFLAGS += -std=c++17
 ALL_CXXFLAGS += -DVERSION=\"$(VERSION)\"
@@ -59,12 +57,6 @@ ALL_CXXFLAGS += -DDATADIR=\"$(datadir)\"
 ALL_CXXFLAGS += -DLOCALSTATEDIR=\"$(localstatedir)\"
 ALL_CXXFLAGS += -MD
 ALL_CXXFLAGS += -fPIC
-ALL_CXXFLAGS += -I$(root_dir)
-ALL_CXXFLAGS += -I$(root_dir)/src
-
-
-ALL_LDFLAGS += -pthread
-ALL_LDFLAGS += -lstdc++
 
 # To go down a level $(call descend,directory[,target[,flags]])
 
@@ -77,6 +69,7 @@ ifneq ($(findstring s,$(filter-out --%,$(MAKEFLAGS))),)
     QUIET_CXX = @echo CXX $@;
     QUIET_LINK = @echo LINK $@;
     QUIET_AR = @echo AR $@;
+    QUIET_BISON = @echo BISON $@;
     QUIET_GEN = @echo GEN $@;
     QUIET_UNZIP = @echo UNZIP $@;
     QUIET_INSTALL = @echo INSTALL $@;
@@ -85,8 +78,8 @@ ifneq ($(findstring s,$(filter-out --%,$(MAKEFLAGS))),)
 endif
 
 # Some generic targets that are the same for all Makefiles
-%: .obj/%.o
-	$(QUIET_CC)$(CC) $(ALL_CFLAGS) $(ALL_LDFLAGS) $^ -o $@
+%.c: %.y
+	$(QUIET_BISON)$(BISON) $< -o $@
 
 .obj/%.o: %.c | .obj
 	$(QUIET_CC)$(CC) $(ALL_CFLAGS) -c -o $@ $<
@@ -96,6 +89,9 @@ endif
 
 .obj:
 	mkdir $@
+
+%: .obj/%.o
+	$(QUIET_CC)$(CC) $(ALL_CFLAGS) $(ALL_LDFLAGS) $^ -o $@
 
 %.a:
 	$(QUIET_AR)$(AR) rc $@ $^
