@@ -19,10 +19,8 @@ char *slurp(FILE *f)
         int c;
         while ((c = fgetc(f)) != EOF) {
                 buf[size++] = c;
-                if (size == alloc) {
-                        alloc = alloc ? alloc * 2 : 2;
-                        buf = GC_realloc(buf, alloc);
-                }
+                if (size == alloc)
+                        buf = GC_realloc(buf, alloc *= 2);
         }
         buf[size++] = 0;
         return buf;
