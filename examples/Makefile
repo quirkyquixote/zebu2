@@ -4,8 +4,15 @@ include ../config.mk
 ALL_CFLAGS += -I$(root_dir)src
 ALL_LDFLAGS += -lreadline -lgc
 
+bins += calc
+bins += math
+bins += lisp
+bins += shon
+
+deps = $(addprefix .obj/,$(addsuffix .d,$(bins)))
+
 .PHONY: all
-all: calc math lisp shon
+all: $(bins)
 
 calc: .obj/calc.o ../src/libzebu.a
 math: .obj/math.o ../src/libzebu.a
@@ -19,3 +26,5 @@ shon: .obj/shon.o ../src/libzebu.a
 clean:
 	$(RM) test
 	$(RM) -r .obj
+
+-include $(deps)

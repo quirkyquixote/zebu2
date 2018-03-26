@@ -13,11 +13,15 @@ tests += zz_head
 tests += zz_tail
 tests += zz_foreach
 
+deps = $(addprefix .obj/,$(addsuffix .d,tests))
+
 .PHONY: all
 all: $(addsuffix .log,$(tests))
 
-%.log: %
-	$(QUIET_GEN)./$<
+%.log: % FORCE
+	$(QUIET_GEN)./$< &> $@
+
+FORCE:
 
 zz_int: .obj/zz_int.o $(root_dir)src/libzebu.a
 zz_ptr: .obj/zz_ptr.o $(root_dir)src/libzebu.a
@@ -35,3 +39,5 @@ zz_foreach: .obj/zz_foreach.o $(root_dir)src/libzebu.a
 clean:
 	$(RM) $(tests)
 	$(RM) -r .obj
+
+-include $(deps)
