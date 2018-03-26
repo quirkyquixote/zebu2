@@ -1,4 +1,0 @@
-(number:"1" number:"2" number:"3")
-(string:"1" string:"2" string:"3")
-(symbol:"1" symbol:"2" symbol:"3")
-(() () ())
