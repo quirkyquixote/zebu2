@@ -5,6 +5,127 @@
 
 int yylex(const char **ptr);
 
+struct zz_fun {
+        const struct zz_type *type;
+        struct zz_ast *(* fun)(struct zz_ast *);
+};
+
+int serialize_fun(struct zz_ast *a, FILE *f)
+{
+        struct zz_fun *x = (void *)a;
+        return fprintf(f, "<fun:%p>", x->fun);
+}
+const struct zz_type *zz_fun_type()
+{
+        static struct zz_type type = {
+                .serialize = serialize_fun
+        };
+        return &type;
+}
+struct zz_ast *zz_fun(struct zz_ast*(*fun)(struct zz_ast*))
+{
+        struct zz_fun *a = GC_malloc_atomic(sizeof(*a));
+        a->type = zz_fun_type();
+        a->fun = fun;
+        return (void *)a;
+}
+int zz_is_fun(struct zz_ast *a)
+{
+        return a != NULL && a->type == zz_fun_type();
+}
+struct zz_fun *zz_to_fun(struct zz_ast *a)
+{
+        return zz_is_fun(a) ? (void *)a : NULL;
+}
+
+struct zz_ast *eval(struct zz_ast *a)
+{
+        if (!zz_is_pair(a))
+                return a;
+        if (!zz_is_fun(zz_head(a)))
+                return a;
+        return zz_to_fun(zz_head(a))->fun(zz_tail(a));
+}
+
+struct zz_ast *op_set(struct zz_ast *a)
+{
+        struct zz_ast *l = eval(zz_head(a));
+        struct zz_ast *r = eval(zz_head(zz_tail(a)));
+        return r;
+}
+struct zz_ast *op_gt(struct zz_ast *a)
+{
+        struct zz_int *l = zz_to_int(eval(zz_head(a)));
+        struct zz_int *r = zz_to_int(eval(zz_head(zz_tail(a))));
+        return l && r && l->num > r->num ? zz_int(1) : NULL;
+}
+struct zz_ast *op_lt(struct zz_ast *a)
+{
+        struct zz_int *l = zz_to_int(eval(zz_head(a)));
+        struct zz_int *r = zz_to_int(eval(zz_head(zz_tail(a))));
+        return l && r && l->num < r->num ? zz_int(1) : NULL;
+}
+struct zz_ast *op_ge(struct zz_ast *a)
+{
+        struct zz_int *l = zz_to_int(eval(zz_head(a)));
+        struct zz_int *r = zz_to_int(eval(zz_head(zz_tail(a))));
+        return l && r && l->num >= r->num ? zz_int(1) : NULL;
+}
+struct zz_ast *op_le(struct zz_ast *a)
+{
+        struct zz_int *l = zz_to_int(eval(zz_head(a)));
+        struct zz_int *r = zz_to_int(eval(zz_head(zz_tail(a))));
+        return l && r && l->num <= r->num ? zz_int(1) : NULL;
+}
+struct zz_ast *op_eq(struct zz_ast *a)
+{
+        struct zz_int *l = zz_to_int(eval(zz_head(a)));
+        struct zz_int *r = zz_to_int(eval(zz_head(zz_tail(a))));
+        return l && r && l->num == r->num ? zz_int(1) : NULL;
+}
+struct zz_ast *op_ne(struct zz_ast *a)
+{
+        struct zz_int *l = zz_to_int(eval(zz_head(a)));
+        struct zz_int *r = zz_to_int(eval(zz_head(zz_tail(a))));
+        return l && r && l->num != r->num ? zz_int(1) : NULL;
+}
+struct zz_ast *op_add(struct zz_ast *a)
+{
+        struct zz_int *l = zz_to_int(eval(zz_head(a)));
+        struct zz_int *r = zz_to_int(eval(zz_head(zz_tail(a))));
+        return l && r ? zz_int(l->num + r->num) : NULL;
+}
+struct zz_ast *op_sub(struct zz_ast *a)
+{
+        struct zz_int *l = zz_to_int(eval(zz_head(a)));
+        struct zz_int *r = zz_to_int(eval(zz_head(zz_tail(a))));
+        return l && r ? zz_int(l->num - r->num) : NULL;
+}
+struct zz_ast *op_mul(struct zz_ast *a)
+{
+        struct zz_int *l = zz_to_int(eval(zz_head(a)));
+        struct zz_int *r = zz_to_int(eval(zz_head(zz_tail(a))));
+        return l && r ? zz_int(l->num * r->num) : NULL;
+}
+struct zz_ast *op_div(struct zz_ast *a)
+{
+        struct zz_int *l = zz_to_int(eval(zz_head(a)));
+        struct zz_int *r = zz_to_int(eval(zz_head(zz_tail(a))));
+        return l && r ? zz_int(l->num / r->num) : NULL;
+}
+struct zz_ast *op_mod(struct zz_ast *a)
+{
+        struct zz_int *l = zz_to_int(eval(zz_head(a)));
+        struct zz_int *r = zz_to_int(eval(zz_head(zz_tail(a))));
+        return l && r ? zz_int(l->num % r->num) : NULL;
+}
+struct zz_ast *op_exp(struct zz_ast *a)
+{
+        struct zz_int *l = zz_to_int(eval(zz_head(a)));
+        struct zz_int *r = zz_to_int(eval(zz_head(zz_tail(a))));
+        return l && r ? zz_int(l->num * r->num) : NULL;
+}
+
 %}
 
 %param {const char **ptr}
@@ -59,8 +180,11 @@ input
 
 line
     : statement_list {
-        zz_print(prune($1, 1), stdout);
-        fputc('\n', stdout);
+        struct zz_ast *r = prune($1, 1);
+        zz_print(r, stdout);
+        fprintf(stdout, " = ");
+        zz_print(eval(r), stdout);
+        fprintf(stdout, "\n");
         }
     |
     ;
@@ -100,7 +224,7 @@ assignment_expression
     ;
 
 assignment_operator
-    : '=' { $$ = zz_str("set"); }
+    : '=' { $$ = zz_fun(op_set); }
     ;
 
 comparative_expression
@@ -113,12 +237,12 @@ comparative_expression
     ;
 
 comparative_operator
-    : '>' { $$ = zz_str("gt"); }
-    | '<' { $$ = zz_str("lt"); }
-    | OP_EQ { $$ = zz_str("eq"); }
-    | OP_NE { $$ = zz_str("ne"); }
-    | OP_GE { $$ = zz_str("ge"); }
-    | OP_LE { $$ = zz_str("le"); }
+    : '>' { $$ = zz_fun(op_gt); }
+    | '<' { $$ = zz_fun(op_lt); }
+    | OP_EQ { $$ = zz_fun(op_eq); }
+    | OP_NE { $$ = zz_fun(op_ne); }
+    | OP_GE { $$ = zz_fun(op_ge); }
+    | OP_LE { $$ = zz_fun(op_le); }
     ;
 
 additive_expression
@@ -131,8 +255,8 @@ additive_expression
     ;
 
 additive_operator
-    : '+' { $$ = zz_str("add"); }
-    | '-' { $$ = zz_str("sub"); }
+    : '+' { $$ = zz_fun(op_add); }
+    | '-' { $$ = zz_fun(op_sub); }
     ;
 
 multiplicative_expression
@@ -145,9 +269,9 @@ multiplicative_expression
     ;
 
 multiplicative_operator
-    : '*' { $$ = zz_str("mul"); }
-    | '/' { $$ = zz_str("div"); }
-    | '%' { $$ = zz_str("mod"); }
+    : '*' { $$ = zz_fun(op_mul); }
+    | '/' { $$ = zz_fun(op_div); }
+    | '%' { $$ = zz_fun(op_mod); }
     ;
 
 exponential_expression
@@ -160,7 +284,7 @@ exponential_expression
     ;
 
 exponential_operator
-    : '^' { $$ = zz_str("exp"); }
+    : '^' { $$ = zz_fun(op_exp); }
     ;
 
 atomic_expression
