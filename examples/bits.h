@@ -43,10 +43,10 @@ void strbuf_slurp(struct strbuf *b, FILE *f)
 
 struct zz_ast* prune(struct zz_ast* a, int first)
 {
-        struct zz_pair* p = zz_to_pair(a);
+        struct zz_pair* p = zz_cast(zz_pair, a);
         if (p == NULL)
                 return a;
-        if (first && p->tail == NULL && zz_is_pair(p->head))
+        if (first && p->tail == NULL && zz_cast(zz_pair, p->head))
                 return prune(p->head, 1);
         p->head = prune(p->head, 1);
         p->tail = prune(p->tail, 0);

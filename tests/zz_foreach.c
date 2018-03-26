@@ -13,13 +13,13 @@ int main(int argc, char *argv[])
         a = NULL;
         strcpy(buf, "");
         zz_foreach(i, a)
-                strcat(buf, zz_to_str(i)->str);
+                strcat(buf, zz_cast(zz_str, i)->str);
         assert(strcmp(buf, "") == 0);
 
         a = zz_str("this is a test");
         strcpy(buf, "");
         zz_foreach(i, a)
-                strcat(buf, zz_to_str(i)->str);
+                strcat(buf, zz_cast(zz_str, i)->str);
         assert(strcmp(buf, "this is a test") == 0);
 
         a = zz_pair(zz_str("this "),
@@ -29,6 +29,6 @@ int main(int argc, char *argv[])
                                                 NULL))));
         strcpy(buf, "");
         zz_foreach(i, a)
-                strcat(buf, zz_to_str(i)->str);
+                strcat(buf, zz_cast(zz_str, i)->str);
         assert(strcmp(buf, "this is a test") == 0);
 }

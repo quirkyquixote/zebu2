@@ -8,10 +8,10 @@ typedef int (operator)(struct zz_ast*);
 
 int eval(struct zz_ast *a)
 {
-        if (zz_is_int(a)) {
-                return zz_to_int(a)->num;
-        } else if (zz_is_pair(a)) {
-                operator *op = zz_to_ptr(zz_head(a))->ptr;
+        if (a->type == zz_int_type()) {
+                return zz_cast(zz_int, a)->num;
+        } else if (a->type == zz_pair_type()) {
+                operator *op = zz_cast(zz_ptr, zz_head(a))->ptr;
                 return op(zz_tail(a));
         } else {
                 abort();

@@ -2,6 +2,7 @@ API Doc
 =======
 
 .. default-domain:: c
+.. highlight:: c
 
 AST Type
 --------
@@ -51,11 +52,10 @@ AST
 
 Handler for all nodes of the AST. Always handled by pointer, the actual node
 may have more fields beyond the end of this struct; if so, the type determines
-what the node can be cast to; see :func:`zz_to_pair()`, :func:`zz_to_int()`,
-:func:`zz_to_ptr()`, and :func:`zz_to_str()`.
+what the node can be cast to; see :func:`zz_cast()`.
 
-The type field poinst of a :type:`const struct zz_type` that determines the
-actual node payload, and how to handle it.
+The type field poinst of a :type:`zz_type` that determines the actual node
+payload, and how to handle it.
 
 All nodes are allocated with the Boehms Garbage Collector so the user doesn't
 need to keep track of them.
@@ -67,16 +67,30 @@ need to keep track of them.
 ============================ ==============================================
 **Member fields**
 ---------------------------------------------------------------------------
-:member:`~zz_ast.type`       a const string, doubles as type name
+:member:`~zz_ast.type`       pointer to a :type:`zz_type`
 ---------------------------- ----------------------------------------------
 **Related functions**
 ---------------------------------------------------------------------------
+:func:`zz_typeof()`          get type of node
+:func:`zz_cast()`            cast node to type, or return NULL
 :func:`zz_print()`           serialize a node
 ============================ ==============================================
 
 .. member:: const struct zz_type* zz_ast.type
 
-   A const string, doubles as type name
+   Determines the type of the node.
+
+.. function:: const struct zz_type* zz_typeof(struct zz_ast* a)
+
+   Return type of node; if :data:`a` is :data:`NULL`, return :data:`NULL`.
+
+.. function:: TYPE zz_cast(TYPE, struct zz_ast* a)
+
+   If :data:`a` is of type :func:`TYPE_type()`, return :data:`a` cast to
+   :type:`struct TYPE`, else return :data:`NULL`.
+   
+   This is implemented as a macro that depends on the names of
+   :func:`TYPE_type()` and :type:`struct TYPE` matching.
 
 .. function:: int zz_print(struct zz_ast* n, FILE* f)
 
@@ -104,8 +118,6 @@ element (that can be another list) and the next element.
 **Related functions**
 ---------------------------------------------------------------------------
 :func:`zz_pair()`              create new pair
-:func:`zz_is_pair()`           true if a node is a pair
-:func:`zz_to_pair()`           cast node to pair
 :func:`zz_head()`              return head
 :func:`zz_tail()`              return tail
 :func:`zz_foreach()`           iterate on a list of pairs
@@ -126,14 +138,6 @@ element (that can be another list) and the next element.
 .. function:: struct zz_ast* zz_pair(struct zz_ast* head, struct zz_ast* tail)
 
    Create new pair
-
-.. function:: int zz_is_pair(struct zz_ast* n)
-
-   Return :data:`1` if :data:`n` is a pair, :data:`0` otherwise
-
-.. function:: struct zz_pair* zz_to_pair(struct zz_ast* n)
-
-   Return :data:`n` cast to :type:`zz_pair`, or :data:`NULL`.
 
 .. function:: struct zz_ast* zz_head(struct zz_ast* a)
 
@@ -165,8 +169,6 @@ Integers hold data of type :type:`int`.
 **Related functions**
 ---------------------------------------------------------------------------
 :func:`zz_int()`               create new integer
-:func:`zz_is_int()`            true if a node is a integer
-:func:`zz_to_int()`            cast node to integer
 ============================== ============================================
 
 .. member:: const struct zz_type* zz_int.type
@@ -181,20 +183,12 @@ Integers hold data of type :type:`int`.
 
    Construct new integer
 
-.. function:: int zz_is_int(struct zz_ast* n)
-
-   Return :data:`1` if :data:`n` is an integer, :data:`0` otherwise
-
-.. function:: struct zz_int* zz_to_int(struct zz_ast* n)
-
-   Return :data:`n` cast to :type:`zz_int`, or :data:`NULL`
-
 Pointer
 -------
 
 Pointers hold data of type :type:`void*`
 
-.. type:: ptruct zz_ptr
+.. type:: struct zz_ptr
 
    Leaf in the AST
 
@@ -207,8 +201,6 @@ Pointers hold data of type :type:`void*`
 **Related functions**
 ---------------------------------------------------------------------------
 :func:`zz_ptr()`               create new pointer
-:func:`zz_is_ptr()`            true if a node is a pointer
-:func:`zz_to_ptr()`            cast node to pointer
 ============================== ============================================
 
 .. member:: const struct zz_type* zz_ptr.type
@@ -222,14 +214,6 @@ Pointers hold data of type :type:`void*`
 .. function:: struct zz_ast* zz_ptr(void* ptr)
 
    Conptruct new pointer
-
-.. function:: int zz_is_ptr(ptruct zz_ast* n)
-
-   Return :data:`1` if :data:`n` is an pointer, :data:`0` otherwise
-
-.. function:: ptruct zz_ptr* zz_to_ptr(ptruct zz_ast* n)
-
-   Return :data:`n` cast to :type:`zz_ptr`, or :data:`NULL`
 
 String
 ------
@@ -249,8 +233,6 @@ Strings hold a null-terminated byte array.
 **Related functions**
 ---------------------------------------------------------------------------
 :func:`zz_str()`               create new string
-:func:`zz_is_str()`            true if a node is a string
-:func:`zz_to_str()`            cast node to string
 ============================== ============================================
 
 .. member:: const struct zz_type* zz_str.type
@@ -265,12 +247,4 @@ Strings hold a null-terminated byte array.
               struct zz_ast* zz_str(const char* str)
 
    Construct new string
-
-.. function:: int zz_is_str(struct zz_ast* n)
-
-   Return :data:`1` if :data:`n` is an string, :data:`0` otherwise
-
-.. function:: struct zz_str* zz_to_str(struct zz_ast* n)
-
-   Return :data:`n` cast to :type:`zz_str`, or :data:`NULL`
 

@@ -23,6 +23,15 @@ struct zz_ast {
         const struct zz_type *type;
 };
 
+static inline const struct zz_type *zz_typeof(struct zz_ast *a)
+{
+        return a == NULL ? NULL : a->type;
+}
+static inline void *_zz_cast(const struct zz_type *t, struct zz_ast *a)
+{
+        return zz_typeof(a) == t ? a : NULL;
+}
+#define zz_cast(_t, _a) ((struct _t*)_zz_cast(_t##_type(), _a))
 int zz_print(struct zz_ast *n, FILE *f);
 
 struct zz_pair {
@@ -32,8 +41,6 @@ struct zz_pair {
 };
 
 struct zz_ast *zz_pair(struct zz_ast *head, struct zz_ast *tail);
-int zz_is_pair(struct zz_ast *n);
-struct zz_pair *zz_to_pair(struct zz_ast *n);
 struct zz_ast* zz_head(struct zz_ast* a);
 struct zz_ast* zz_tail(struct zz_ast* a);
 
@@ -46,8 +53,6 @@ struct zz_int {
 };
 
 struct zz_ast *zz_int(int num);
-int zz_is_int(struct zz_ast *n);
-struct zz_int *zz_to_int(struct zz_ast *n);
 
 struct zz_ptr {
         const struct zz_type *type;
@@ -55,8 +60,6 @@ struct zz_ptr {
 };
 
 struct zz_ast *zz_ptr(void *ptr);
-int zz_is_ptr(struct zz_ast *n);
-struct zz_ptr *zz_to_ptr(struct zz_ast *n);
 
 struct zz_str {
         const struct zz_type *type;
@@ -65,7 +68,5 @@ struct zz_str {
 
 struct zz_ast *zz_str_with_len(const char *str, int len);
 struct zz_ast *zz_str(const char *str);
-int zz_is_str(struct zz_ast *n);
-struct zz_str *zz_to_str(struct zz_ast *n);
 
 #endif  // _ZEBU_H

@@ -66,22 +66,14 @@ struct zz_ast *zz_pair(struct zz_ast *head, struct zz_ast *tail)
         n->tail = tail;
         return (void *)n;
 }
-int zz_is_pair(struct zz_ast *n)
-{
-        return n != NULL && n->type == zz_pair_type();
-}
-struct zz_pair *zz_to_pair(struct zz_ast *n)
-{
-        return zz_is_pair(n) ? (void *)n : NULL;
-}
 struct zz_ast* zz_head(struct zz_ast* a)
 {
-        struct zz_pair *p = zz_to_pair(a);
+        struct zz_pair *p = zz_cast(zz_pair, a);
         return p == NULL ? a : p->head;
 }
 struct zz_ast* zz_tail(struct zz_ast* a)
 {
-        struct zz_pair *p = zz_to_pair(a);
+        struct zz_pair *p = zz_cast(zz_pair, a);
         return p == NULL ? NULL : p->tail;
 }
 
@@ -92,14 +84,6 @@ struct zz_ast *zz_int(int num)
         a->num = num;
         return (void *)a;
 }
-int zz_is_int(struct zz_ast* a)
-{
-        return a != NULL && a->type == zz_int_type();
-}
-struct zz_int *zz_to_int(struct zz_ast *a)
-{
-        return zz_is_int(a) ? (void *)a : NULL;
-}
 
 struct zz_ast *zz_ptr(void *ptr)
 {
@@ -107,14 +91,6 @@ struct zz_ast *zz_ptr(void *ptr)
         a->type = zz_ptr_type();
         a->ptr = ptr;
         return (void *)a;
-}
-int zz_is_ptr(struct zz_ast* a)
-{
-        return a != NULL && a->type == zz_ptr_type();
-}
-struct zz_ptr *zz_to_ptr(struct zz_ast *a)
-{
-        return zz_is_ptr(a) ? (void *)a : NULL;
 }
 
 struct zz_ast *zz_str_with_len(const char *str, int len)
@@ -129,21 +105,13 @@ struct zz_ast *zz_str(const char *str)
 {
         return zz_str_with_len(str, strlen(str));
 }
-int zz_is_str(struct zz_ast *n)
-{
-        return n != NULL && n->type == zz_str_type();
-}
-struct zz_str *zz_to_str(struct zz_ast *n)
-{
-        return zz_is_str(n) ? (void *)n : NULL;
-}
 
 int zz_print(struct zz_ast *n, FILE *f)
 {
         int ret = 0;
         if (n == NULL) {
                 ret += fprintf(f, "()");
-        } else if (zz_is_pair(n)) {
+        } else if (zz_cast(zz_pair, n)) {
                 fputc('(', f);
                 ret += n->type->serialize(n, f);
                 fputc(')', f);

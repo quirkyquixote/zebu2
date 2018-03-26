@@ -29,22 +29,14 @@ struct zz_ast *zz_fun(struct zz_ast*(*fun)(struct zz_ast*))
         a->fun = fun;
         return (void *)a;
 }
-int zz_is_fun(struct zz_ast *a)
-{
-        return a != NULL && a->type == zz_fun_type();
-}
-struct zz_fun *zz_to_fun(struct zz_ast *a)
-{
-        return zz_is_fun(a) ? (void *)a : NULL;
-}
 
 struct zz_ast *eval(struct zz_ast *a)
 {
-        if (!zz_is_pair(a))
+        if (a->type != zz_pair_type())
                 return a;
-        if (!zz_is_fun(zz_head(a)))
+        if (zz_head(a)->type != zz_fun_type())
                 return a;
-        return zz_to_fun(zz_head(a))->fun(zz_tail(a));
+        return zz_cast(zz_fun, zz_head(a))->fun(zz_tail(a));
 }
 
 struct zz_ast *op_set(struct zz_ast *a)
@@ -55,74 +47,74 @@ struct zz_ast *op_set(struct zz_ast *a)
 }
 struct zz_ast *op_gt(struct zz_ast *a)
 {
-        struct zz_int *l = zz_to_int(eval(zz_head(a)));
-        struct zz_int *r = zz_to_int(eval(zz_head(zz_tail(a))));
+        struct zz_int *l = zz_cast(zz_int, eval(zz_head(a)));
+        struct zz_int *r = zz_cast(zz_int, eval(zz_head(zz_tail(a))));
         return l && r && l->num > r->num ? zz_int(1) : NULL;
 }
 struct zz_ast *op_lt(struct zz_ast *a)
 {
-        struct zz_int *l = zz_to_int(eval(zz_head(a)));
-        struct zz_int *r = zz_to_int(eval(zz_head(zz_tail(a))));
+        struct zz_int *l = zz_cast(zz_int, eval(zz_head(a)));
+        struct zz_int *r = zz_cast(zz_int, eval(zz_head(zz_tail(a))));
         return l && r && l->num < r->num ? zz_int(1) : NULL;
 }
 struct zz_ast *op_ge(struct zz_ast *a)
 {
-        struct zz_int *l = zz_to_int(eval(zz_head(a)));
-        struct zz_int *r = zz_to_int(eval(zz_head(zz_tail(a))));
+        struct zz_int *l = zz_cast(zz_int, eval(zz_head(a)));
+        struct zz_int *r = zz_cast(zz_int, eval(zz_head(zz_tail(a))));
         return l && r && l->num >= r->num ? zz_int(1) : NULL;
 }
 struct zz_ast *op_le(struct zz_ast *a)
 {
-        struct zz_int *l = zz_to_int(eval(zz_head(a)));
-        struct zz_int *r = zz_to_int(eval(zz_head(zz_tail(a))));
+        struct zz_int *l = zz_cast(zz_int, eval(zz_head(a)));
+        struct zz_int *r = zz_cast(zz_int, eval(zz_head(zz_tail(a))));
         return l && r && l->num <= r->num ? zz_int(1) : NULL;
 }
 struct zz_ast *op_eq(struct zz_ast *a)
 {
-        struct zz_int *l = zz_to_int(eval(zz_head(a)));
-        struct zz_int *r = zz_to_int(eval(zz_head(zz_tail(a))));
+        struct zz_int *l = zz_cast(zz_int, eval(zz_head(a)));
+        struct zz_int *r = zz_cast(zz_int, eval(zz_head(zz_tail(a))));
         return l && r && l->num == r->num ? zz_int(1) : NULL;
 }
 struct zz_ast *op_ne(struct zz_ast *a)
 {
-        struct zz_int *l = zz_to_int(eval(zz_head(a)));
-        struct zz_int *r = zz_to_int(eval(zz_head(zz_tail(a))));
+        struct zz_int *l = zz_cast(zz_int, eval(zz_head(a)));
+        struct zz_int *r = zz_cast(zz_int, eval(zz_head(zz_tail(a))));
         return l && r && l->num != r->num ? zz_int(1) : NULL;
 }
 struct zz_ast *op_add(struct zz_ast *a)
 {
-        struct zz_int *l = zz_to_int(eval(zz_head(a)));
-        struct zz_int *r = zz_to_int(eval(zz_head(zz_tail(a))));
+        struct zz_int *l = zz_cast(zz_int, eval(zz_head(a)));
+        struct zz_int *r = zz_cast(zz_int, eval(zz_head(zz_tail(a))));
         return l && r ? zz_int(l->num + r->num) : NULL;
 }
 struct zz_ast *op_sub(struct zz_ast *a)
 {
-        struct zz_int *l = zz_to_int(eval(zz_head(a)));
-        struct zz_int *r = zz_to_int(eval(zz_head(zz_tail(a))));
+        struct zz_int *l = zz_cast(zz_int, eval(zz_head(a)));
+        struct zz_int *r = zz_cast(zz_int, eval(zz_head(zz_tail(a))));
         return l && r ? zz_int(l->num - r->num) : NULL;
 }
 struct zz_ast *op_mul(struct zz_ast *a)
 {
-        struct zz_int *l = zz_to_int(eval(zz_head(a)));
-        struct zz_int *r = zz_to_int(eval(zz_head(zz_tail(a))));
+        struct zz_int *l = zz_cast(zz_int, eval(zz_head(a)));
+        struct zz_int *r = zz_cast(zz_int, eval(zz_head(zz_tail(a))));
         return l && r ? zz_int(l->num * r->num) : NULL;
 }
 struct zz_ast *op_div(struct zz_ast *a)
 {
-        struct zz_int *l = zz_to_int(eval(zz_head(a)));
-        struct zz_int *r = zz_to_int(eval(zz_head(zz_tail(a))));
+        struct zz_int *l = zz_cast(zz_int, eval(zz_head(a)));
+        struct zz_int *r = zz_cast(zz_int, eval(zz_head(zz_tail(a))));
         return l && r ? zz_int(l->num / r->num) : NULL;
 }
 struct zz_ast *op_mod(struct zz_ast *a)
 {
-        struct zz_int *l = zz_to_int(eval(zz_head(a)));
-        struct zz_int *r = zz_to_int(eval(zz_head(zz_tail(a))));
+        struct zz_int *l = zz_cast(zz_int, eval(zz_head(a)));
+        struct zz_int *r = zz_cast(zz_int, eval(zz_head(zz_tail(a))));
         return l && r ? zz_int(l->num % r->num) : NULL;
 }
 struct zz_ast *op_exp(struct zz_ast *a)
 {
-        struct zz_int *l = zz_to_int(eval(zz_head(a)));
-        struct zz_int *r = zz_to_int(eval(zz_head(zz_tail(a))));
+        struct zz_int *l = zz_cast(zz_int, eval(zz_head(a)));
+        struct zz_int *r = zz_cast(zz_int, eval(zz_head(zz_tail(a))));
         return l && r ? zz_int(l->num * r->num) : NULL;
 }
 

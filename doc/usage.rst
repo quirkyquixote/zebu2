@@ -1,122 +1,62 @@
 Usage
 =====
 
+.. default-domain:: c
 .. highlight:: c
 
-A basic example in which an AST is built from a grammar similar to the one used
-in the reverse polish notation calculator example in the GNU Bison
-documentation
+Custom Node Types
+-----------------
 
-Declarations
-------------
+Zebu allows declaring new custom node types. To do so, the user needs three
+elements
 
-::
+- a structure that holds the data :type:`struct TYPE`,
+- a function :func:`CUSTOM_type()` that returns a :type:`zz_type` object
+- optionally, one or more functions to construct new :type:`struct TYPE` objects.
 
-    %{
-    /*
-     * These are the tokens that define node types in the AST
-     */
-    extern const char *TOK_INPUT;
-    extern const char *TOK_NUM;
-    extern const char *TOK_ADD;
-    extern const char *TOK_SUB;
-    extern const char *TOK_MUL;
-    extern const char *TOK_DIV;
-    extern const char *TOK_EXP;
-    extern const char *TOK_NEG;
-    %}
+The first field of :type:`struct TYPE` must be a const pointer to an object of
+type :type:`zz_type`, to match with :type:`zz_ast` objects::
 
-    /*
-     * At least one possible data type will be struct zz_ast; all of them may
-     * be, if the lexer has access to the zz_ast_mgr object and can construct
-     * nodes by itself.
-     */
-    %union {
-        int number;
-        struct zz_ast *node;
+    struct CUSTOM {
+        const struct zz_type *type;
+        /* further fields */
+    };
+
+The :data:`type` field of this struct will always hold a pointer to the object
+returned by the :func:`CUSTOM_type()` function::
+
+    const struct zz_type* CUSTOM_type(void)
+    {
+        static struct zz_type *type = {
+            .serialize = serialize_CUSTOM
+        };
+        return &type;
     }
 
-    /*
-     * Token and rule declarations
-     */
-    %token '\n'
-    %token '+'
-    %token '-'
-    %token '*'
-    %token '/'
-    %token 'n'
-    %token <number> NUM
-    %type <ast> input
-    %type <ast> line
-    %type <ast> exp
+    int serialize_CUSTOM(struct zz_ast *a, FILE *f)
+    {
+        /* implement CUSTOM node serialization */
+    }
 
+    /* other functions */
 
-Grammar Rules
--------------
+The :type:`zz_type` object does not only identify the type of the nodes, but
+holds pointers to functions to perform operations on nodes of type
+:type:`CUSTOM`.
 
-::
+Finally, you should declare one or more constructors for objects of this type.
+This is not actually required, but makes your life easier::
 
-    /*
-     * To build a list of any size, the empty rule generates a NULL terminator
-     * and the rest of the list is generated recursively
-     */
-    input
-        : {
-            $$ = NULL;
-            }
-        | input line {
-            $$ = zz_pair($1, $2);
-            }
-        ;
+    struct zz_ast* CUSTOM(/* arguments */)
+    {
+        struct CUSTOM* a = GC_malloc_atomic(sizeof(*a));
+        a->type = CUSTOM_type();
+        /* initialize fields of a from arguments */
+        return (void *)a;
+    }
 
-    /*
-     * Pass the ast upwards
-     */
-    line
-        : exp '\n' {
-            return $$;
-            }
-        ;
+See :type:`zz_str` for an example of multiple constructors.
 
-    exp
-        : NUM {
-            $$ = zz_str(TOK_NUM, $1);
-            }
-        | exp exp '+'     { 
-            $$ = zz_pair(zz_str(TOK_ADD, ""),
-                 zz_pair($1,
-                 zz_pair($2,
-                 NULL)));
-            }
-        | exp exp '-'     { 
-            $$ = zz_pair(zz_str(TOK_SUB, ""),
-                 zz_pair($1,
-                 zz_pair($2,
-                 NULL)));
-            }
-        | exp exp '*'     { 
-            $$ = zz_pair(zz_str(TOK_MUL, ""),
-                 zz_pair($1,
-                 zz_pair($2,
-                 NULL)));
-            }
-        | exp exp '/'     { 
-            $$ = zz_pair(zz_str(TOK_DIV, ""),
-                 zz_pair($1,
-                 zz_pair($2,
-                 NULL)));
-            }
-        | exp exp '^'     { 
-            $$ = zz_pair(zz_str(TOK_EXP, ""),
-                 zz_pair($1,
-                 zz_pair($2,
-                 NULL)));
-            }
-        | exp 'n'         {
-            $$ = zz_pair(zz_str(TOK_NEG, ""),
-                 zz_pair($1,
-                 NULL));
-            }
-        ;
-
+See examples/shon.y for an example of a custom node type at work; it declares a
+custom function type for :type:`struct zz_ast*(struct zz_ast*)`.
 
