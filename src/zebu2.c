@@ -1,7 +1,7 @@
 
 #include "zebu2.h"
 
-int serialize_pair(struct zz_ast *a, FILE *f)
+int serialize_pair(struct zz_ast *a, FILE * f)
 {
         struct zz_pair *x = (void *)a;
         int ret = 0;
@@ -13,17 +13,20 @@ int serialize_pair(struct zz_ast *a, FILE *f)
         }
         return ret;
 }
-int serialize_int(struct zz_ast *a, FILE *f)
+
+int serialize_int(struct zz_ast *a, FILE * f)
 {
         struct zz_int *x = (void *)a;
         return fprintf(f, "%d", x->num);
 }
-int serialize_ptr(struct zz_ast *a, FILE *f)
+
+int serialize_ptr(struct zz_ast *a, FILE * f)
 {
         struct zz_ptr *x = (void *)a;
         return fprintf(f, "%p", x->ptr);
 }
-int serialize_str(struct zz_ast *a, FILE *f)
+
+int serialize_str(struct zz_ast *a, FILE * f)
 {
         struct zz_str *x = (void *)a;
         return fprintf(f, "%s", x->str);
@@ -36,6 +39,7 @@ const struct zz_type *zz_pair_type(void)
         };
         return &type;
 }
+
 const struct zz_type *zz_int_type(void)
 {
         static struct zz_type type = {
@@ -43,6 +47,7 @@ const struct zz_type *zz_int_type(void)
         };
         return &type;
 }
+
 const struct zz_type *zz_ptr_type(void)
 {
         static struct zz_type type = {
@@ -50,6 +55,7 @@ const struct zz_type *zz_ptr_type(void)
         };
         return &type;
 }
+
 const struct zz_type *zz_str_type(void)
 {
         static struct zz_type type = {
@@ -66,12 +72,14 @@ struct zz_ast *zz_pair(struct zz_ast *head, struct zz_ast *tail)
         n->tail = tail;
         return (void *)n;
 }
-struct zz_ast* zz_head(struct zz_ast* a)
+
+struct zz_ast *zz_head(struct zz_ast *a)
 {
         struct zz_pair *p = zz_cast(zz_pair, a);
         return p == NULL ? a : p->head;
 }
-struct zz_ast* zz_tail(struct zz_ast* a)
+
+struct zz_ast *zz_tail(struct zz_ast *a)
 {
         struct zz_pair *p = zz_cast(zz_pair, a);
         return p == NULL ? NULL : p->tail;
@@ -101,12 +109,13 @@ struct zz_ast *zz_str_with_len(const char *str, int len)
         n->str[len] = 0;
         return (void *)n;
 }
+
 struct zz_ast *zz_str(const char *str)
 {
         return zz_str_with_len(str, strlen(str));
 }
 
-int zz_print(struct zz_ast *n, FILE *f)
+int zz_print(struct zz_ast *n, FILE * f)
 {
         int ret = 0;
         if (n == NULL) {

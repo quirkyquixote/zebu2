@@ -26,6 +26,7 @@ void strbuf_clear(struct strbuf *b)
 {
         b->size = 0;
 }
+
 void strbuf_append(struct strbuf *b, char c)
 {
         if (b->size == b->alloc) {
@@ -34,16 +35,17 @@ void strbuf_append(struct strbuf *b, char c)
         }
         b->str[b->size++] = c;
 }
-void strbuf_slurp(struct strbuf *b, FILE *f)
+
+void strbuf_slurp(struct strbuf *b, FILE * f)
 {
         int c;
         while ((c = fgetc(f)) != EOF)
                 strbuf_append(b, c);
 }
 
-struct zz_ast* prune(struct zz_ast* a, int first)
+struct zz_ast *prune(struct zz_ast *a, int first)
 {
-        struct zz_pair* p = zz_cast(zz_pair, a);
+        struct zz_pair *p = zz_cast(zz_pair, a);
         if (p == NULL)
                 return a;
         if (first && p->tail == NULL && zz_cast(zz_pair, p->head))
@@ -65,7 +67,7 @@ int main(int argc, char *argv[])
         GC_init();
 
         if (argc > 1) {
-                struct strbuf buf = {NULL, 0, 0};
+                struct strbuf buf = { NULL, 0, 0 };
                 for (int i = 1; i < argc; ++i) {
                         strbuf_clear(&buf);
                         FILE *f = fopen(argv[i], "r");
@@ -91,11 +93,11 @@ int main(int argc, char *argv[])
                         }
                 }
         } else {
-                struct strbuf buf = {NULL, 0, 0};
+                struct strbuf buf = { NULL, 0, 0 };
                 strbuf_slurp(&buf, stdin);
                 const char *ptr = buf.str;
                 yyparse(&ptr);
         }
 }
 
-#endif  // ZEBU_TEST_BITS_H_
+#endif                          // ZEBU_TEST_BITS_H_

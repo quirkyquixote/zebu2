@@ -11,7 +11,7 @@
 struct zz_ast;
 
 struct zz_type {
-        int (* serialize)(struct zz_ast *, FILE *);
+        int (*serialize) (struct zz_ast *, FILE *);
 };
 
 const struct zz_type *zz_pair_type(void);
@@ -27,22 +27,24 @@ static inline const struct zz_type *zz_typeof(struct zz_ast *a)
 {
         return a == NULL ? NULL : a->type;
 }
+
 static inline void *_zz_cast(const struct zz_type *t, struct zz_ast *a)
 {
         return zz_typeof(a) == t ? a : NULL;
 }
+
 #define zz_cast(_t, _a) ((struct _t*)_zz_cast(_t##_type(), _a))
-int zz_print(struct zz_ast *n, FILE *f);
+int zz_print(struct zz_ast *n, FILE * f);
 
 struct zz_pair {
         const struct zz_type *type;
-        struct zz_ast* head;
-        struct zz_ast* tail;
+        struct zz_ast *head;
+        struct zz_ast *tail;
 };
 
 struct zz_ast *zz_pair(struct zz_ast *head, struct zz_ast *tail);
-struct zz_ast* zz_head(struct zz_ast* a);
-struct zz_ast* zz_tail(struct zz_ast* a);
+struct zz_ast *zz_head(struct zz_ast *a);
+struct zz_ast *zz_tail(struct zz_ast *a);
 
 #define zz_foreach(_x, _head) \
 for (struct zz_ast* _i = _head; _x = zz_head(_i), _i; _i = zz_tail(_i))
@@ -69,4 +71,4 @@ struct zz_str {
 struct zz_ast *zz_str_with_len(const char *str, int len);
 struct zz_ast *zz_str(const char *str);
 
-#endif  // _ZEBU_H
+#endif                          // _ZEBU_H

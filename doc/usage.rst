@@ -10,8 +10,8 @@ Custom Node Types
 Zebu allows declaring new custom node types. To do so, the user needs three
 elements
 
-- a structure that holds the data :type:`struct TYPE`,
-- a function :func:`CUSTOM_type()` that returns a :type:`zz_type` object
+- a :type:`struct TYPE` that holds the data,
+- a function :func:`CUSTOM_type()` that returns a :type:`zz_type` object,
 - optionally, one or more functions to construct new :type:`struct TYPE` objects.
 
 The first field of :type:`struct TYPE` must be a const pointer to an object of
