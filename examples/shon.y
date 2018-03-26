@@ -1,9 +1,5 @@
 %{
-#include <ctype.h>
-
-#include "bits.h"
-
-int yylex();
+#include "test.h"
 
 struct zz_fun {
         const struct zz_type *type;
@@ -266,6 +262,8 @@ atomic_expression
     ;
 
 %%
+
+#include <ctype.h>
 
 int yylex(YYSTYPE *lvalp, const char **ptr)
 {

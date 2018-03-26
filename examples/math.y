@@ -1,7 +1,5 @@
 %{
-#include "bits.h"
-
-int yylex();
+#include "test.h"
 
 typedef int (operator)(struct zz_ast*);
 

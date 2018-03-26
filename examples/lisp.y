@@ -1,8 +1,5 @@
 %{
-#include "bits.h"
-
-int yylex();
-
+#include "test.h"
 %}
 
 %define api.pure full
