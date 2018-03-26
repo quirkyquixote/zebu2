@@ -2,7 +2,6 @@
 *.d
 *.a
 *.so
-*.tab.c
 *.log
 tests/zz_int
 tests/zz_ptr
@@ -12,6 +11,10 @@ tests/zz_cast
 tests/zz_head
 tests/zz_tail
 tests/zz_foreach
+examples/calc.c
+examples/math.c
+examples/lisp.c
+examples/shon.c
 examples/calc
 examples/math
 examples/lisp
