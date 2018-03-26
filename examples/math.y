@@ -1,7 +1,7 @@
 %{
 #include "bits.h"
 
-int yylex(const char **ptr);
+int yylex();
 
 typedef int (operator)(struct zz_ast*);
 
@@ -52,13 +52,9 @@ int op_neg(struct zz_ast *a)
 
 %}
 
+%define api.pure full
 %param {const char **ptr}
-/*
- * All data is represented by nodes.
- */
-%union {
-    struct zz_ast *ast;
-}
+%define api.value.type {struct zz_ast *}
 
 /*
  * Token and rule declarations
@@ -72,15 +68,7 @@ int op_neg(struct zz_ast *a)
 %token '%'
 %token '('
 %token ')'
-%token <ast> ATOM
-%type <ast> expression
-%type <ast> assignment_expression
-%type <ast> assignment_operator
-%type <ast> additive_expression
-%type <ast> additive_operator
-%type <ast> multiplicative_expression
-%type <ast> multiplicative_operator
-%type <ast> atomic_expression
+%token ATOM
 
 %%
 
@@ -153,7 +141,7 @@ atomic_expression
 
 #include <ctype.h>
 
-int yylex(const char **ptr)
+int yylex(YYSTYPE *lvalp, const char **ptr)
 {
         while (*(*ptr) == ' ' || *(*ptr) == '\t' || *(*ptr) == '\r')
                 ++(*ptr);
@@ -167,11 +155,11 @@ int yylex(const char **ptr)
                         do
                                 ++(*ptr);
                         while (isalnum(*(*ptr)) || *(*ptr) == '_');
-                        yylval.ast = zz_str_with_len(begin, (*ptr) - begin);
+                        *lvalp = zz_str_with_len(begin, (*ptr) - begin);
                 }
                 return ATOM;
          case '0'...'9':
-                yylval.ast = zz_int(strtol(*ptr, (char**)ptr, 10));
+                *lvalp = zz_int(strtol(*ptr, (char**)ptr, 10));
                 return ATOM;
          case 0:
                 return 0;

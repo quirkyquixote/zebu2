@@ -14,8 +14,6 @@
 
 #include "zebu2.h"
 
-static char *prog_ptr;
-
 struct strbuf {
         char *str;
         int size;

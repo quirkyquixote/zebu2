@@ -2,7 +2,7 @@
 
 #include "bits.h"
 
-int yylex(const char **ptr);
+int yylex();
 
 typedef int (operator)(struct zz_ast*);
 
@@ -49,13 +49,9 @@ int op_neg(struct zz_ast *a)
 
 %}
 
+%define api.pure full
 %param {const char **ptr}
-/*
- * All data is represented by nodes.
- */
-%union {
-    struct zz_ast *ast;
-}
+%define api.value.type {struct zz_ast *}
 
 /*
  * Token and rule declarations
@@ -66,8 +62,7 @@ int op_neg(struct zz_ast *a)
 %token '*'
 %token '/'
 %token 'n'
-%token <ast> NUM
-%type <ast> exp
+%token NUM
 
 %%
 
@@ -112,14 +107,14 @@ exp
 
 #include <ctype.h>
 
-int yylex(const char **ptr)
+int yylex(YYSTYPE *lvalp, const char **ptr)
 {
         while (*(*ptr) == ' ' || *(*ptr) == '\t' || *(*ptr) == '\r')
                 ++(*ptr);
 
         switch (*(*ptr)) {
          case '0'...'9':
-                yylval.ast = zz_int(strtol(*ptr, (char **)ptr, 10));
+                *lvalp = zz_int(strtol(*ptr, (char **)ptr, 10));
                 return NUM;
          case 0:
                 return 0;

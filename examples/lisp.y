@@ -1,17 +1,13 @@
 %{
 #include "bits.h"
 
-int yylex(const char **ptr);
+int yylex();
 
 %}
 
+%define api.pure full
 %param {const char **ptr}
-/*
- * All data is represented by nodes.
- */
-%union {
-    struct zz_ast *ast;
-}
+%define api.value.type {struct zz_ast *}
 
 /*
  * Token and rule declarations
@@ -20,9 +16,7 @@ int yylex(const char **ptr);
 %token '\''
 %token '('
 %token ')'
-%token <ast> ATOM
-%type <ast> expr
-%type <ast> list
+%token ATOM
 
 %%
 
@@ -54,7 +48,7 @@ list
 
 #include <ctype.h>
 
-int yylex(const char **ptr)
+int yylex(YYSTYPE *lvalp, const char **ptr)
 {
         while (*(*ptr) == ' ' || *(*ptr) == '\t' || *(*ptr) == '\r')
                 ++(*ptr);
@@ -68,7 +62,7 @@ int yylex(const char **ptr)
          case '\'':
                 return *((*ptr)++);
          case '0'...'9':
-                yylval.ast = zz_int(strtol(*ptr, (char **)ptr, 10));
+                *lvalp = zz_int(strtol(*ptr, (char **)ptr, 10));
                 return ATOM;
          case '"':
                 {
@@ -78,7 +72,7 @@ int yylex(const char **ptr)
                                 fprintf(stderr, "Unterminated string\n");
                                 abort();
                         }
-                        yylval.ast = zz_str_with_len(begin, *ptr - begin);
+                        *lvalp = zz_str_with_len(begin, *ptr - begin);
                         ++*ptr;
                 }
                 return ATOM;
@@ -89,7 +83,7 @@ int yylex(const char **ptr)
                                 ++(*ptr);
                         while (!isspace(*(*ptr)) && *(*ptr) != '(' &&
                                 *(*ptr) != ')' && *(*ptr) != '\0');
-                        yylval.ast = zz_str_with_len(begin, (*ptr) - begin);
+                        *lvalp = zz_str_with_len(begin, (*ptr) - begin);
                 }
                 return ATOM;
         }
