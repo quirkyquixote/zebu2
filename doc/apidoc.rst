@@ -7,7 +7,7 @@ API Doc
 AST Type
 --------
 
-Defines a type of AST with an unique associated data; holds pointers to
+Defines an AST node that holds data of a specific type; contains pointers to
 functions to manipulate such data.
 
 .. type:: struct zz_type
@@ -50,15 +50,15 @@ functions to manipulate such data.
 AST
 ---
 
-Handler for all nodes of the AST. Always handled by pointer, the actual node
-may have more fields beyond the end of this struct; if so, the type determines
-what the node can be cast to; see :func:`zz_cast()`.
+Handler for all nodes of the AST. Usually, no actual instances of
+:type:`zz_ast` exist, but a number of other types (:type:`zz_int`,
+:type:`zz_ptr`, :type:`zz_str`, :type:`zz_pair`) share the same first field, so
+they can be handled through pointers to this type; see :func:`zz_cast()`.
 
-The type field poinst of a :type:`zz_type` that determines the actual node
-payload, and how to handle it.
+The :member:`~zz_ast.type` field determines what the actual object is and how
+the data may be manipulated;
 
-All nodes are allocated with the Boehms Garbage Collector so the user doesn't
-need to keep track of them.
+All nodes are allocated with the Boehms Garbage Collector.
 
 .. type:: struct zz_ast
 
@@ -101,8 +101,8 @@ Pair
 
 A node in a singly-linked list
 
-This is very similar to a LISP cons cell: it holds pointers to a data
-element (that can be another list) and the next element.
+This is basically a LISP cons cell: it holds pointers to a data element (the
+head, that can be another list) and the next element (the tail).
 
 .. type:: struct zz_pair
 
