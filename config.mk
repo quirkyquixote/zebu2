@@ -24,7 +24,7 @@ localstatedir := $(prefix)/var/zebu
 CC ?= cc
 CXX ?= c++
 AR ?= ar
-BISON ?= bison
+YACC ?= yacc
 INSTALL ?= install
 INSTALL_PROGRAM := $(INSTALL)
 INSTALL_DATA := $(INSTALL) -m 644
@@ -69,7 +69,7 @@ ifneq ($(findstring s,$(filter-out --%,$(MAKEFLAGS))),)
     QUIET_CXX = @echo CXX $@;
     QUIET_LINK = @echo LINK $@;
     QUIET_AR = @echo AR $@;
-    QUIET_BISON = @echo BISON $@;
+    QUIET_YACC = @echo YACC $@;
     QUIET_GEN = @echo GEN $@;
     QUIET_UNZIP = @echo UNZIP $@;
     QUIET_INSTALL = @echo INSTALL $@;
@@ -79,7 +79,7 @@ endif
 
 # Some generic targets that are the same for all Makefiles
 %.c: %.y
-	$(QUIET_BISON)$(BISON) $< -o $@
+	$(QUIET_YACC)$(YACC) $< -o $@
 
 .obj/%.o: %.c | .obj
 	$(QUIET_CC)$(CC) $(ALL_CFLAGS) -c -o $@ $<

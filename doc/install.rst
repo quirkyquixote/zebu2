@@ -4,8 +4,9 @@ Installation
 Requirements
 ------------
 
-Zebu is written en plain C, uses the Boehms Garbage Collector, and its tests
-make use of the GNU readline library.
+Zebu is written en plain C and uses the Boehms Garbage Collector.
+
+The included examples require YACC (or Bison) and the GNU readline library.
 
 Makefiles
 ---------
