@@ -117,7 +117,7 @@ struct zz_ast *op_exp(struct zz_ast *a)
 %}
 
 %define api.pure full
-%param {const char **ptr}
+%param {FILE *f}
 %define api.value.type {struct zz_ast *}
 
 /*
@@ -265,65 +265,86 @@ atomic_expression
 
 #include <ctype.h>
 
-int yylex(YYSTYPE *lvalp, const char **ptr)
+int yylex(YYSTYPE *lvalp, FILE *f)
 {
-        while (**ptr == ' ' || **ptr == '\t' || **ptr == '\r')
-                ++*ptr;
+        static int len = 0;
+        static int cap = 0;
+        static char *buf = NULL;
 
-        switch (**ptr) {
-         case 'a'...'z':
-         case 'A'...'Z':
-         case '_':
-                {
-                        const char *begin = (*ptr)++;
-                        while (isalnum(**ptr) || **ptr == '_')
-                                ++*ptr;
-                        *lvalp = zz_str_with_len(begin, *ptr - begin);
-                }
-                return ATOM;
-         case '0'...'9':
-                *lvalp = zz_int(strtol(*ptr, (char **)ptr, 10));
-                return ATOM;
-         case '"':
-                {
-                        const char *begin = ++*ptr;
-                        *ptr = strchr(*ptr, '"');
-                        if (*ptr == NULL) {
-                                fprintf(stderr, "Unterminated string\n");
-                                abort();
+        for (;;) {
+                int c = fgetc(f);
+                switch (c) {
+                 case EOF:
+                        return 0;
+                 case ' ':
+                 case '\t':
+                 case '\n':
+                 case '\r':
+                        break;
+                 case 'a'...'z':
+                 case 'A'...'Z':
+                 case '_':
+                        len = 0;
+                        do {
+                                if (len == cap) {
+                                        cap = cap ? cap * 2 : 2;
+                                        buf = realloc(buf, cap);
+                                }
+                                buf[len++] = c;
+                                c = fgetc(f);
+                        } while (c == '_' || isalnum(c));
+                        ungetc(c, f);
+                        *lvalp = zz_str_with_len(buf, len);
+                        return ATOM;
+                 case '0'...'9':
+                        ungetc(c, f);
+                        fscanf(f, "%d", &c);
+                        *lvalp = zz_int(c);
+                        return ATOM;
+                 case '"':
+                        c = fgetc(f);
+                        len = 0;
+                        while (c != '"') {
+                                if (c == EOF) {
+                                        fprintf(stderr, "Unterminated string\n");
+                                        abort();
+                                }
+                                if (len == cap) {
+                                        cap = cap ? cap * 2 : 2;
+                                        buf = realloc(buf, cap);
+                                }
+                                buf[len++] = c;
+                                c = fgetc(f);
                         }
-                        *lvalp = zz_str_with_len(begin, *ptr - begin);
-                        ++*ptr;
+                        *lvalp = zz_str_with_len(buf, len);
+                        return ATOM;
+                 case '=':
+                        c = fgetc(f);
+                        if (c == '=')
+                                return OP_EQ;
+                        ungetc(c, f);
+                        return '=';
+                 case '>':
+                        c = fgetc(f);
+                        if (c == '=')
+                                return OP_GE;
+                        ungetc(c, f);
+                        return '>';
+                 case '<':
+                        c = fgetc(f);
+                        if (c == '=')
+                                return OP_LE;
+                        ungetc(c, f);
+                        return '<';
+                 case '!':
+                        c = fgetc(f);
+                        if (c == '=')
+                                return OP_NE;
+                        ungetc(c, f);
+                        return '!';
+                 default:
+                        return c;
                 }
-                return ATOM;
-         case '=':
-                if (*++*ptr == '=') {
-                        ++*ptr;
-                        return OP_EQ;
-                }
-                return '=';
-         case '>':
-                if (*++*ptr == '=') {
-                        ++*ptr;
-                        return OP_GE;
-                }
-                return '>';
-         case '<':
-                if (*++*ptr == '=') {
-                        ++*ptr;
-                        return OP_LE;
-                }
-                return '<';
-         case '!':
-                if (*++*ptr == '=') {
-                        ++*ptr;
-                        return OP_NE;
-                }
-                return '!';
-         case 0:
-                return 0;
-         default:
-                return *((*ptr)++);
         }
 }
 

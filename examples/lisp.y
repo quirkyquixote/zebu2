@@ -3,7 +3,7 @@
 %}
 
 %define api.pure full
-%param {const char **ptr}
+%param {FILE *f}
 %define api.value.type {struct zz_ast *}
 
 /*
@@ -45,44 +45,62 @@ list
 
 #include <ctype.h>
 
-int yylex(YYSTYPE *lvalp, const char **ptr)
+int yylex(YYSTYPE *lvalp, FILE *f)
 {
-        while (*(*ptr) == ' ' || *(*ptr) == '\t' || *(*ptr) == '\r')
-                ++(*ptr);
+        static int size = 0;
+        static int alloc = 0;
+        static char *buf = NULL;
 
-        switch (*(*ptr)) {
-         case 0:
-                return 0;
-         case '(':
-         case ')':
-         case '\n':
-         case '\'':
-                return *((*ptr)++);
-         case '0'...'9':
-                *lvalp = zz_int(strtol(*ptr, (char **)ptr, 10));
-                return ATOM;
-         case '"':
-                {
-                        const char *begin = ++*ptr;
-                        *ptr = strchr(*ptr, '"');
-                        if (*ptr == NULL) {
-                                fprintf(stderr, "Unterminated string\n");
-                                abort();
+        for (;;) {
+                int c = fgetc(f);
+                switch (c) {
+                 case EOF:
+                        return 0;
+                 case ' ':
+                 case '\t':
+                 case '\r':
+                        break;
+                 case '(':
+                 case ')':
+                 case '\n':
+                 case '\'':
+                        return c;
+                 case '0'...'9':
+                        ungetc(c, f);
+                        fscanf(f, "%d", &c);
+                        *lvalp = zz_int(c);
+                        return ATOM;
+                 case '"':
+                        size = 0;
+                        for (;;) {
+                                switch ((c = fgetc(f))) {
+                                 case EOF:
+                                        fprintf(stderr, "Unterminated string\n");
+                                        abort();
+                                 case '"':
+                                        *lvalp = zz_str_with_len(buf, size);
+                                        return ATOM;
+                                }
+                                if (size == alloc) {
+                                        alloc = alloc ? alloc * 2 : 2;
+                                        buf = realloc(buf, alloc);
+                                }
+                                buf[size++] = c;
                         }
-                        *lvalp = zz_str_with_len(begin, *ptr - begin);
-                        ++*ptr;
+                 default:
+                        size = 0;
+                        do {
+                                if (size == alloc) {
+                                        alloc = alloc ? alloc * 2 : 2;
+                                        buf = realloc(buf, alloc);
+                                }
+                                buf[size++] = c;
+                                c = fgetc(f);
+                        } while (c != EOF && !isspace(c));
+                        ungetc(c, f);
+                        *lvalp = zz_str_with_len(buf, size);
+                        return ATOM;
                 }
-                return ATOM;
-         default:
-                {
-                        const char *begin = (*ptr);
-                        do
-                                ++(*ptr);
-                        while (!isspace(*(*ptr)) && *(*ptr) != '(' &&
-                                *(*ptr) != ')' && *(*ptr) != '\0');
-                        *lvalp = zz_str_with_len(begin, (*ptr) - begin);
-                }
-                return ATOM;
         }
 }
 

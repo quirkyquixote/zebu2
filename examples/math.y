@@ -51,7 +51,7 @@ int op_neg(struct zz_ast *a)
 %}
 
 %define api.pure full
-%param {const char **ptr}
+%param {FILE *f}
 %define api.value.type {struct zz_ast *}
 
 /*
@@ -139,30 +139,44 @@ atomic_expression
 
 #include <ctype.h>
 
-int yylex(YYSTYPE *lvalp, const char **ptr)
+int yylex(YYSTYPE *lvalp, FILE *f)
 {
-        while (*(*ptr) == ' ' || *(*ptr) == '\t' || *(*ptr) == '\r')
-                ++(*ptr);
+        static int size = 0;
+        static int alloc = 0;
+        static char *buf = NULL;
 
-        switch (*(*ptr)) {
-         case 'a'...'z':
-         case 'A'...'Z':
-         case '_':
-                {
-                        const char *begin = (*ptr);
-                        do
-                                ++(*ptr);
-                        while (isalnum(*(*ptr)) || *(*ptr) == '_');
-                        *lvalp = zz_str_with_len(begin, (*ptr) - begin);
+        for (;;) {
+                int c = fgetc(f);
+                switch (c) {
+                 case EOF:
+                        return 0;
+                 case ' ':
+                 case '\t':
+                 case '\r':
+                        break;
+                 case 'a'...'z':
+                 case 'A'...'Z':
+                 case '_':
+                        size = 0;
+                        do {
+                                if (size == alloc) {
+                                        alloc = alloc ? alloc * 2 : 2;
+                                        buf = realloc(buf, alloc);
+                                }
+                                buf[size++] = c;
+                                c = fgetc(f);
+                        } while (isalnum(c) || c == '_');
+                        ungetc(c, f);
+                        *lvalp = zz_str_with_len(buf, size);
+                        return ATOM;
+                 case '0'...'9':
+                        ungetc(c, f);
+                        fscanf(f, "%d", &c);
+                        *lvalp = zz_int(c);
+                        return ATOM;
+                 default:
+                        return c;
                 }
-                return ATOM;
-         case '0'...'9':
-                *lvalp = zz_int(strtol(*ptr, (char**)ptr, 10));
-                return ATOM;
-         case 0:
-                return 0;
-         default:
-                return *((*ptr)++);
         }
 }
 

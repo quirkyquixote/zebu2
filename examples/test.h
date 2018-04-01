@@ -7,7 +7,7 @@
 struct zz_ast *prune(struct zz_ast *a, int first);
 
 int yylex();
-int yyparse(const char **ptr);
-void yyerror(const char **ptr, const char *msg);
+int yyparse();
+void yyerror();
 
 #endif                          // ZEBU_TEST_H_

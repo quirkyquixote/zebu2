@@ -54,10 +54,8 @@ int main(int argc, char *argv[])
                                 perror(argv[i]);
                                 continue;
                         }
-                        char *buf = slurp(f);
+                        yyparse(f);
                         fclose(f);
-                        const char *ptr = buf;
-                        yyparse(&ptr);
                 }
         } else if (isatty(fileno(stdin))) {
                 for (;;) {
@@ -65,16 +63,17 @@ int main(int argc, char *argv[])
                         if (line) {
                                 if (*line) {
                                         add_history(line);
-                                        const char *ptr = line;
-                                        yyparse(&ptr);
+                                        FILE *f = tmpfile();
+                                        fwrite(line, strlen(line), 1, f);
+                                        fseek(f, SEEK_SET, 0);
+                                        yyparse(f);
+                                        fclose(f);
                                 }
                                 free(line);
                         }
                 }
         } else {
-                char *buf = slurp(stdin);
-                const char *ptr = buf;
-                yyparse(&ptr);
+                yyparse(stdin);
         }
 }
 
