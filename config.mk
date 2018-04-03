@@ -5,7 +5,7 @@ root_dir := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 
 # When version changes, increment this number
 
-VERSION := 2.0.0
+VERSION := 1.0.0
 
 # Determine where we are going to install things
 
@@ -13,8 +13,8 @@ prefix := /usr/local
 suffix := $(shell echo $(VERSION) | grep -o '^[0-9]*')
 bindir := $(prefix)/bin
 libdir := $(prefix)/lib
-datadir := $(prefix)/share/zebu$(suffix)
-docdir := $(prefix)/share/doc/zebu$(suffix)
+datadir := $(prefix)/share/zebu2
+docdir := $(prefix)/share/doc/zebu2
 htmldir := $(docdir)
 pdfdir := $(docdir)
 localstatedir := $(prefix)/var/zebu
@@ -97,18 +97,17 @@ endif
 	$(QUIET_AR)$(AR) rc $@ $^
 
 %.so:
-	$(QUIET_LINK)$(CC) -shared -Wl,-soname,$@.$(version) -o $@ $^
+	$(QUIET_LINK)$(CC) -shared -Wl,-soname,$@.$(VERSION) -o $@ $^
 
-$(DESTDIR)$(bindir)/%.$(VERSION): %
+$(DESTDIR)$(bindir)/%: %
 	@$(INSTALL) -d $(@D)
-	$(QUIET_INSTALL)$(INSTALL_PROGRAM) $< $@$(suffix)
+	$(QUIET_INSTALL)$(INSTALL_PROGRAM) $< $@.$(VERSION)
+	$(QUIET_GEN)cd $(@D); ln -f -s $(@F).$(VERSION) $(@F)
 
-$(DESTDIR)$(libdir)/%.$(VERSION): %
+$(DESTDIR)$(libdir)/%: %
 	@$(INSTALL) -d $(@D)
-	$(QUIET_INSTALL)$(INSTALL_DATA) $< $@
-
-%.$(suffix): %.$(VERSION)
-	cd $(@D); ln -f -s $(<F) $(@F)
+	$(QUIET_INSTALL)$(INSTALL_DATA) $< $@.$(VERSION)
+	$(QUIET_GEN)cd $(@D); ln -f -s $(@F).$(VERSION) $(@F)
 
 $(DESTDIR)$(prefix)/include/%: %
 	@$(INSTALL) -d $(@D)

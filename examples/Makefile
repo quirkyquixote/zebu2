@@ -14,13 +14,13 @@ deps = $(addprefix .obj/,$(addsuffix .d,$(bins)))
 .PHONY: all
 all: $(bins)
 
-calc: .obj/calc.o .obj/test.o ../src/libzebu.a
-math: .obj/math.o .obj/test.o ../src/libzebu.a
-lisp: .obj/lisp.o .obj/test.o ../src/libzebu.a
-shon: .obj/shon.o .obj/test.o ../src/libzebu.a
+calc: .obj/calc.o .obj/test.o ../src/libzebu2.a
+math: .obj/math.o .obj/test.o ../src/libzebu2.a
+lisp: .obj/lisp.o .obj/test.o ../src/libzebu2.a
+shon: .obj/shon.o .obj/test.o ../src/libzebu2.a
 
-../src/libzebu.a:
-	$(call descend,../src,libzebu.a)
+../src/libzebu2.a:
+	$(call descend,../src,libzebu2.a)
 
 .PHONY: clean
 clean:

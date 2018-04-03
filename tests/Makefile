@@ -23,17 +23,17 @@ all: $(addsuffix .log,$(tests))
 
 FORCE:
 
-zz_int: .obj/zz_int.o $(root_dir)src/libzebu.a
-zz_ptr: .obj/zz_ptr.o $(root_dir)src/libzebu.a
-zz_str: .obj/zz_str.o $(root_dir)src/libzebu.a
-zz_pair: .obj/zz_pair.o $(root_dir)src/libzebu.a
-zz_cast: .obj/zz_cast.o $(root_dir)src/libzebu.a
-zz_head: .obj/zz_head.o $(root_dir)src/libzebu.a
-zz_tail: .obj/zz_tail.o $(root_dir)src/libzebu.a
-zz_foreach: .obj/zz_foreach.o $(root_dir)src/libzebu.a
+zz_int: .obj/zz_int.o $(root_dir)src/libzebu2.a
+zz_ptr: .obj/zz_ptr.o $(root_dir)src/libzebu2.a
+zz_str: .obj/zz_str.o $(root_dir)src/libzebu2.a
+zz_pair: .obj/zz_pair.o $(root_dir)src/libzebu2.a
+zz_cast: .obj/zz_cast.o $(root_dir)src/libzebu2.a
+zz_head: .obj/zz_head.o $(root_dir)src/libzebu2.a
+zz_tail: .obj/zz_tail.o $(root_dir)src/libzebu2.a
+zz_foreach: .obj/zz_foreach.o $(root_dir)src/libzebu2.a
 
-../src/libzebu.a:
-	$(call descend,../src,libzebu.a)
+../src/libzebu2.a:
+	(call descend,../src,libzebu2.a)
 
 .PHONY: clean
 clean:
