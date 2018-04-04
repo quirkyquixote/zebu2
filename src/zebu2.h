@@ -71,4 +71,11 @@ struct zz_str {
 struct zz_ast *zz_str_with_len(const char *str, int len);
 struct zz_ast *zz_str(const char *str);
 
+struct zz_list {
+        struct zz_ast *first;
+        struct zz_ast *last;
+};
+
+struct zz_list zz_append(struct zz_list l, struct zz_ast *a);
+
 #endif                          // _ZEBU_H

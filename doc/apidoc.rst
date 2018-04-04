@@ -248,3 +248,32 @@ Strings hold a null-terminated byte array.
 
    Construct new string
 
+List
+----
+
+Utilities to build lists.
+
+.. type:: struct zz_list
+
+============================== ============================================
+**Member fields**
+---------------------------------------------------------------------------
+:member:`~zz_list.first`       pointer to the first element
+:member:`~zz_list.last`        pointer to the last element
+------------------------------ --------------------------------------------
+**Related functions**
+---------------------------------------------------------------------------
+:func:`zz_append()`            append element to list
+============================== ============================================
+
+.. member:: struct zz_ast* zz_list.first
+
+   Pointer to the first element of a list, or NULL.
+
+.. member:: struct zz_ast* zz_list.last
+
+   Pointer to the last element of a list, or NULL.
+
+.. function:: struct zz_list zz_append(struct zz_list l, struct zz_ast* a)
+
+   Append an element to an existing list.

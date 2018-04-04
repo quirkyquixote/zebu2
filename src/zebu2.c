@@ -129,3 +129,13 @@ int zz_print(struct zz_ast *n, FILE * f)
         }
         return ret;
 }
+
+struct zz_list zz_append(struct zz_list l, struct zz_ast *a)
+{
+        struct zz_ast *last = zz_pair(a, NULL);
+        if (l.first)
+                l.last = zz_cast(zz_pair, l.last)->tail = last;
+        else
+                l.first = l.last = last;
+        return l;
+}
