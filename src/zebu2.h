@@ -76,6 +76,11 @@ struct zz_list {
         struct zz_ast *last;
 };
 
+struct zz_list _zz_list(struct zz_ast *first, ...);
 struct zz_list zz_append(struct zz_list l, struct zz_ast *a);
+int _zz_unpack(struct zz_ast *list, ...);
+
+#define zz_list(...) _zz_list(__VA_ARGS__, NULL)
+#define zz_unpack(...) _zz_unpack(__VA_ARGS__, NULL)
 
 #endif                          // _ZEBU_H

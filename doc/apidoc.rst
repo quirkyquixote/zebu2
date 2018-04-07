@@ -263,6 +263,8 @@ Utilities to build lists.
 ------------------------------ --------------------------------------------
 **Related functions**
 ---------------------------------------------------------------------------
+:func:`zz_list()`              create list
+:func:`zz_unpack()`            extract all list elements
 :func:`zz_append()`            append element to list
 ============================== ============================================
 
@@ -273,6 +275,20 @@ Utilities to build lists.
 .. member:: struct zz_ast* zz_list.last
 
    Pointer to the last element of a list, or NULL.
+
+.. function:: struct zz_list zz_list(struct zz_ast* first, ...)
+
+   Construct list from elements list.
+   Implemented as a macro that appends :data:`NULL` to the element list and
+   calls the actual function.
+   To create an empty list, pass :data:`NULL` as the only element.
+
+.. function:: int zz_unpack(struct zz_list l, ...)
+
+   Extract all elements from a list. Every argument after the first one must be
+   a pointer to :type:`struct zz_ast*` where the element can be stored.
+   Implemented as a macro that appends :data:`NULL` to the element list and
+   calls the actual function.
 
 .. function:: struct zz_list zz_append(struct zz_list l, struct zz_ast* a)
 

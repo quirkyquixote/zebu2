@@ -1,6 +1,8 @@
 
 #include "zebu2.h"
 
+#include <stdarg.h>
+
 int serialize_pair(struct zz_ast *a, FILE * f)
 {
         struct zz_pair *x = (void *)a;
@@ -130,6 +132,21 @@ int zz_print(struct zz_ast *n, FILE * f)
         return ret;
 }
 
+struct zz_list _zz_list(struct zz_ast *first, ...)
+{
+        struct zz_list ret = (struct zz_list){NULL, NULL};
+        if (first != NULL) {
+                ret = zz_append(ret, first);
+                va_list ap;
+                va_start(ap, first);
+                struct zz_ast *a;
+                while ((a = va_arg(ap, void *)) != NULL)
+                        ret = zz_append(ret, a);
+                va_end(ap);
+        }
+        return ret;
+}
+
 struct zz_list zz_append(struct zz_list l, struct zz_ast *a)
 {
         struct zz_ast *last = zz_pair(a, NULL);
@@ -139,3 +156,23 @@ struct zz_list zz_append(struct zz_list l, struct zz_ast *a)
                 l.first = l.last = last;
         return l;
 }
+
+int _zz_unpack(struct zz_ast *list, ...)
+{
+        int ret = -1;
+        va_list ap;
+        va_start(ap, list);
+        struct zz_ast *x, *y;
+        zz_foreach(x, list) {
+                if ((y = va_arg(ap, void *)) == NULL)
+                        goto cleanup;
+                *(struct zz_ast **)y = x;
+        }
+        if ((y = va_arg(ap, void *)) != NULL)
+                goto cleanup;
+        ret = 0;
+cleanup:
+        va_end(ap);
+        return ret;
+}
+
