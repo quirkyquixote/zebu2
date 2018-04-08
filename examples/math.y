@@ -88,12 +88,10 @@ expression
    ;
 
 assignment_expression
-    : additive_expression assignment_operator assignment_expression {
-        $$ = zz_pair($2, zz_pair($1, zz_pair($3, NULL)));
+    : assignment_expression assignment_operator additive_expression {
+        $$ = zz_list($2, $1, $3).first;
         }
-    | additive_expression {
-        $$ = $1;
-        }
+    | additive_expression
     ;
 
 assignment_operator
@@ -101,12 +99,10 @@ assignment_operator
     ;
 
 additive_expression
-    : multiplicative_expression additive_operator additive_expression {
-        $$ = zz_pair($2, zz_pair($1, zz_pair($3, NULL)));
+    : additive_expression additive_operator multiplicative_expression {
+        $$ = zz_list($2, $1, $3).first;
         }
-    | multiplicative_expression {
-        $$ = $1;
-        }
+    | multiplicative_expression
     ;
 
 additive_operator
@@ -115,12 +111,10 @@ additive_operator
     ;
 
 multiplicative_expression
-    : atomic_expression multiplicative_operator multiplicative_expression {
-        $$ = zz_pair($2, zz_pair($1, zz_pair($3, NULL)));
+    : multiplicative_expression multiplicative_operator primary_expression {
+        $$ = zz_list($2, $1, $3).first;
         }
-    | atomic_expression {
-        $$ = $1;
-        }
+    | primary_expression
     ;
 
 multiplicative_operator
@@ -130,7 +124,7 @@ multiplicative_operator
     | '^' { $$ = zz_ptr(op_exp); }
     ;
 
-atomic_expression
+primary_expression
     : ATOM { $$ = $1; }
     | '(' expression ')' { $$ = $2; }
     ;

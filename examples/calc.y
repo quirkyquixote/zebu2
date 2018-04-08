@@ -81,22 +81,22 @@ exp
         $$ = $1;
         }
     | exp exp '+' { 
-        $$ = zz_pair(zz_ptr(op_add), zz_pair($1, zz_pair($2, NULL)));
+        $$ = zz_list(zz_ptr(op_add), $1, $2).first;
         }
     | exp exp '-' { 
-        $$ = zz_pair(zz_ptr(op_sub), zz_pair($1, zz_pair($2, NULL)));
+        $$ = zz_list(zz_ptr(op_sub), $1, $2).first;
         }
     | exp exp '*' { 
-        $$ = zz_pair(zz_ptr(op_mul), zz_pair($1, zz_pair($2, NULL)));
+        $$ = zz_list(zz_ptr(op_mul), $1, $2).first;
         }
     | exp exp '/' { 
-        $$ = zz_pair(zz_ptr(op_div), zz_pair($1, zz_pair($2, NULL)));
+        $$ = zz_list(zz_ptr(op_div), $1, $2).first;
         }
     | exp exp '^' { 
-        $$ = zz_pair(zz_ptr(op_exp), zz_pair($1, zz_pair($2, NULL)));
+        $$ = zz_list(zz_ptr(op_exp), $1, $2).first;
         }
     | exp 'n' {
-        $$ = zz_pair(zz_ptr(op_neg), zz_pair($1, NULL));
+        $$ = zz_list(zz_ptr(op_neg), $1).first;
         }
     ;
 

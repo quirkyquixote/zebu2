@@ -4,7 +4,11 @@
 
 %define api.pure full
 %param {FILE *f}
-%define api.value.type {struct zz_ast *}
+
+%union {
+        struct zz_ast* ast;
+        struct zz_list list;
+}
 
 /*
  * Token and rule declarations
@@ -13,7 +17,10 @@
 %token '\''
 %token '('
 %token ')'
-%token ATOM
+%token<ast> ATOM
+
+%type<ast> expr
+%type<list> list
 
 %%
 
@@ -31,14 +38,14 @@ line
     ;
 
 expr
-   : '(' list ')' { $$ = $2; }
-   | '\'' expr { $$ = zz_pair(zz_str("quote"), zz_pair($2, NULL)); }
-   | ATOM { $$ = $1; }
+   : '(' list ')' { $$ = $2.first; }
+   | '\'' expr { $$ = zz_list(zz_str("quote"), $2).first; }
+   | ATOM
    ;
 
 list
-   : expr list { $$ = zz_pair($1, $2); }
-   | { $$ = NULL; }
+   : list expr { $$ = zz_append($1, $2); }
+   | { $$ = zz_list(NULL); }
    ;
 
 %%
@@ -68,7 +75,7 @@ int yylex(YYSTYPE *lvalp, FILE *f)
                  case '0'...'9':
                         ungetc(c, f);
                         fscanf(f, "%d", &c);
-                        *lvalp = zz_int(c);
+                        lvalp->ast = zz_int(c);
                         return ATOM;
                  case '"':
                         size = 0;
@@ -78,7 +85,7 @@ int yylex(YYSTYPE *lvalp, FILE *f)
                                         fprintf(stderr, "Unterminated string\n");
                                         abort();
                                  case '"':
-                                        *lvalp = zz_str_with_len(buf, size);
+                                        lvalp->ast = zz_str_with_len(buf, size);
                                         return ATOM;
                                 }
                                 if (size == alloc) {
@@ -98,7 +105,7 @@ int yylex(YYSTYPE *lvalp, FILE *f)
                                 c = fgetc(f);
                         } while (c != EOF && !isspace(c));
                         ungetc(c, f);
-                        *lvalp = zz_str_with_len(buf, size);
+                        lvalp->ast = zz_str_with_len(buf, size);
                         return ATOM;
                 }
         }

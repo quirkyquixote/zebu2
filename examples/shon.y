@@ -37,8 +37,9 @@ struct zz_ast *eval(struct zz_ast *a)
 
 struct zz_ast *op_set(struct zz_ast *a)
 {
-        struct zz_ast *l = eval(zz_head(a));
-        struct zz_ast *r = eval(zz_head(zz_tail(a)));
+        struct zz_ast *l, *r;
+        if (zz_unpack(a, &l, &r) != 0)
+                return NULL;
         return r;
 }
 struct zz_ast *op_gt(struct zz_ast *a)
@@ -118,7 +119,11 @@ struct zz_ast *op_exp(struct zz_ast *a)
 
 %define api.pure full
 %param {FILE *f}
-%define api.value.type {struct zz_ast *}
+
+%union {
+        struct zz_ast *ast;
+        struct zz_list list;
+}
 
 /*
  * Token and rule declarations
@@ -138,7 +143,23 @@ struct zz_ast *op_exp(struct zz_ast *a)
 %token OP_NE
 %token OP_GE
 %token OP_LE
-%token ATOM
+%token<ast> ATOM
+
+%type<list> statement_list
+%type<list> statement
+%type<ast> expression
+%type<ast> assignment_expression
+%type<ast> assignment_operator
+%type<ast> relational_expression
+%type<ast> relational_operator
+%type<ast> additive_expression
+%type<ast> additive_operator
+%type<ast> multiplicative_expression
+%type<ast> multiplicative_operator
+%type<ast> exponential_expression
+%type<ast> exponential_operator
+%type<ast> primary_expression
+
 
 %%
 
@@ -149,7 +170,7 @@ input
 
 line
     : statement_list {
-        struct zz_ast *r = prune($1, 1);
+        struct zz_ast *r = prune($1.first, 1);
         zz_print(r, stdout);
         fprintf(stdout, " = ");
         zz_print(eval(r), stdout);
@@ -159,53 +180,39 @@ line
     ;
 
 statement_list
-    : statement ';' statement_list {
-        $$ = zz_pair($1, $3);
-        }
-    | statement {
-        $$ = zz_pair($1, NULL);
-        }
-    | {
-        $$ = NULL;
-        }
+    : statement_list ';' statement { $$ = zz_append($1, $3.first); }
+    | statement { $$ = zz_list($1.first); }
+    | { $$ = zz_list(NULL); }
     ;
 
 statement
-    : expression statement {
-        $$ = zz_pair($1, $2);
-        }
-    | {
-        $$ = NULL;
-        }
+    : statement expression { $$ = zz_append($1, $2); }
+    | { $$ = zz_list(NULL); }
     ;
 
 expression
-   : assignment_expression { $$ = $1; }
+   : assignment_expression
    ;
 
 assignment_expression
-    : comparative_expression assignment_operator assignment_expression {
-        $$ = zz_pair($2, zz_pair($1, zz_pair($3, NULL)));
+    : assignment_expression assignment_operator relational_expression {
+        $$ = zz_list($2, $1, $3).first;
         }
-    | comparative_expression {
-        $$ = $1;
-        }
+    | relational_expression
     ;
 
 assignment_operator
     : '=' { $$ = zz_fun(op_set); }
     ;
 
-comparative_expression
-    : additive_expression comparative_operator comparative_expression {
-        $$ = zz_pair($2, zz_pair($1, zz_pair($3, NULL)));
+relational_expression
+    : relational_expression relational_operator additive_expression {
+        $$ = zz_list($2, $1, $3).first;
         }
-    | additive_expression {
-        $$ = $1;
-        }
+    | additive_expression
     ;
 
-comparative_operator
+relational_operator
     : '>' { $$ = zz_fun(op_gt); }
     | '<' { $$ = zz_fun(op_lt); }
     | OP_EQ { $$ = zz_fun(op_eq); }
@@ -215,12 +222,10 @@ comparative_operator
     ;
 
 additive_expression
-    : multiplicative_expression additive_operator additive_expression {
-        $$ = zz_pair($2, zz_pair($1, zz_pair($3, NULL)));
+    : additive_expression additive_operator multiplicative_expression {
+        $$ = zz_list($2, $1, $3).first;
         }
-    | multiplicative_expression {
-        $$ = $1;
-        }
+    | multiplicative_expression
     ;
 
 additive_operator
@@ -229,12 +234,10 @@ additive_operator
     ;
 
 multiplicative_expression
-    : exponential_expression multiplicative_operator multiplicative_expression {
-        $$ = zz_pair($2, zz_pair($1, zz_pair($3, NULL)));
+    : multiplicative_expression multiplicative_operator exponential_expression {
+        $$ = zz_list($2, $1, $3).first;
         }
-    | exponential_expression {
-        $$ = $1;
-        }
+    | exponential_expression
     ;
 
 multiplicative_operator
@@ -244,21 +247,19 @@ multiplicative_operator
     ;
 
 exponential_expression
-    : atomic_expression exponential_operator exponential_expression {
-        $$ = zz_pair($2, zz_pair($1, zz_pair($3, NULL)));
+    : exponential_expression exponential_operator primary_expression {
+        $$ = zz_list($2, $1, $3).first;
         }
-    | atomic_expression {
-        $$ = $1;
-        }
+    | primary_expression
     ;
 
 exponential_operator
     : '^' { $$ = zz_fun(op_exp); }
     ;
 
-atomic_expression
-    : ATOM { $$ = $1; }
-    | '(' statement_list ')' { $$ = $2; }
+primary_expression
+    : ATOM
+    | '(' statement_list ')' { $$ = $2.first; }
     ;
 
 %%
@@ -294,12 +295,12 @@ int yylex(YYSTYPE *lvalp, FILE *f)
                                 c = fgetc(f);
                         } while (c == '_' || isalnum(c));
                         ungetc(c, f);
-                        *lvalp = zz_str_with_len(buf, len);
+                        lvalp->ast = zz_str_with_len(buf, len);
                         return ATOM;
                  case '0'...'9':
                         ungetc(c, f);
                         fscanf(f, "%d", &c);
-                        *lvalp = zz_int(c);
+                        lvalp->ast = zz_int(c);
                         return ATOM;
                  case '"':
                         c = fgetc(f);
@@ -316,7 +317,7 @@ int yylex(YYSTYPE *lvalp, FILE *f)
                                 buf[len++] = c;
                                 c = fgetc(f);
                         }
-                        *lvalp = zz_str_with_len(buf, len);
+                        lvalp->ast = zz_str_with_len(buf, len);
                         return ATOM;
                  case '=':
                         c = fgetc(f);
