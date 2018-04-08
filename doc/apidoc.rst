@@ -153,6 +153,7 @@ head, that can be another list) and the next element (the tail).
 :func:`zz_head()`              return head
 :func:`zz_tail()`              return tail
 :func:`zz_insert()`            insert element after
+:func:`zz_replace()`           replace head
 :func:`zz_foreach()`           iterate on a list of pairs
 :func:`zz_unpack()`            extract all list elements
 :func:`zz_index()`             return nth element
@@ -186,6 +187,10 @@ head, that can be another list) and the next element (the tail).
 
    Insert :data:`next` after :data:`a`; returns newly cleated :type:`zz_pair`
    object whose head is :data:`next`.
+
+.. function:: void zz_replace(struct zz_ast* a, struct zz_ast* head)
+
+   Replace head of :data:`a` with :data:`head`.
 
 .. function:: void zz_foreach(struct zz_ast* x, struct zz_ast* head)
 

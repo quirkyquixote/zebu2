@@ -152,6 +152,11 @@ struct zz_ast *zz_insert(struct zz_ast *a, struct zz_ast *next)
         return (p->tail = zz_pair(next, p->tail));
 }
 
+void zz_replace(struct zz_ast *a, struct zz_ast *head)
+{
+        zz_cast(zz_pair, a)->head = head;
+}
+
 int _zz_unpack(struct zz_ast *list, ...)
 {
         int ret = -1;
@@ -188,7 +193,7 @@ struct zz_ast *zz_int(int num)
 
 struct zz_ast *zz_ptr(void *ptr)
 {
-        struct zz_ptr *a = GC_malloc_atomic(sizeof(*a));
+                struct zz_ptr *a = GC_malloc_atomic(sizeof(*a));
         a->type = zz_ptr_type();
         a->ptr = ptr;
         return (void *)a;
