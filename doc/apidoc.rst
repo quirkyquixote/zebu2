@@ -153,6 +153,8 @@ head, that can be another list) and the next element (the tail).
 :func:`zz_head()`              return head
 :func:`zz_tail()`              return tail
 :func:`zz_foreach()`           iterate on a list of pairs
+:func:`zz_unpack()`            extract all list elements
+:func:`zz_index()`             return nth element
 ============================== ============================================
 
 .. member:: const struct zz_type* zz_pair.type
@@ -182,6 +184,21 @@ head, that can be another list) and the next element (the tail).
 .. function:: void zz_foreach(struct zz_ast* x, struct zz_ast* head)
 
    Iterate on a list of pairs.
+
+.. function:: int zz_unpack(struct zz_ast* a, ...)
+
+   Extract all elements from a list. Every argument after the first one must be
+   a pointer to :type:`struct zz_ast*` where the element can be stored.
+   Implemented as a macro that appends :data:`NULL` to the element list and
+   calls the actual function.
+
+.. function:: struct zz_ast* zz_index(struct zz_ast* a, int i)
+
+   Return :data:`i`-th element of the list whose handler is :data:`a`.
+   If :data:`a` is not a list, :data:`zz_index(a, 0)` returns :data:`a`, and
+   :data:`zz_index(a, N)` for every other :data:`N` returns :data:`NULL`.
+   For every :data:`i` past the end of the list, :data:`NULL` is returned.
+   Append an element to an existing list.
 
 Integer
 -------
@@ -296,9 +313,7 @@ Utilities to build lists.
 **Related functions**
 ---------------------------------------------------------------------------
 :func:`zz_list()`              create list
-:func:`zz_unpack()`            extract all list elements
 :func:`zz_append()`            append element to list
-:func:`zz_index()`             return nth element
 ============================== ============================================
 
 .. member:: struct zz_ast* zz_list.first
@@ -316,21 +331,7 @@ Utilities to build lists.
    calls the actual function.
    To create an empty list, pass :data:`NULL` as the only element.
 
-.. function:: int zz_unpack(struct zz_list l, ...)
-
-   Extract all elements from a list. Every argument after the first one must be
-   a pointer to :type:`struct zz_ast*` where the element can be stored.
-   Implemented as a macro that appends :data:`NULL` to the element list and
-   calls the actual function.
-
 .. function:: struct zz_list zz_append(struct zz_list l, struct zz_ast* a)
 
    Append an element to an existing list.
 
-.. function:: struct zz_ast* zz_index(struct zz_ast* a, int i)
-
-   Return :data:`i`-th element of the list whose handler is :data:`a`.
-   If :data:`a` is not a list, :data:`zz_index(a, 0)` returns :data:`a`, and
-   :data:`zz_index(a, N)` for every other :data:`N` returns :data:`NULL`.
-   For every :data:`i` past the end of the list, :data:`NULL` is returned.
-   Append an element to an existing list.
