@@ -13,6 +13,7 @@ tests/zz_tail
 tests/zz_foreach
 tests/zz_cmp
 tests/zz_copy
+tests/zz_index
 examples/calc.c
 examples/math.c
 examples/lisp.c

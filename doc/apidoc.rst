@@ -298,6 +298,7 @@ Utilities to build lists.
 :func:`zz_list()`              create list
 :func:`zz_unpack()`            extract all list elements
 :func:`zz_append()`            append element to list
+:func:`zz_index()`             return nth element
 ============================== ============================================
 
 .. member:: struct zz_ast* zz_list.first
@@ -324,4 +325,12 @@ Utilities to build lists.
 
 .. function:: struct zz_list zz_append(struct zz_list l, struct zz_ast* a)
 
+   Append an element to an existing list.
+
+.. function:: struct zz_ast* zz_index(struct zz_ast* a, int i)
+
+   Return :data:`i`-th element of the list whose handler is :data:`a`.
+   If :data:`a` is not a list, :data:`zz_index(a, 0)` returns :data:`a`, and
+   :data:`zz_index(a, N)` for every other :data:`N` returns :data:`NULL`.
+   For every :data:`i` past the end of the list, :data:`NULL` is returned.
    Append an element to an existing list.

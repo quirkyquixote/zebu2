@@ -247,3 +247,9 @@ cleanup:
         return ret;
 }
 
+struct zz_ast *zz_index(struct zz_ast *a, int i)
+{
+        while (i--)
+                a = zz_tail(a);
+        return zz_head(a);
+}
