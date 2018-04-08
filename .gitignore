@@ -11,6 +11,8 @@ tests/zz_cast
 tests/zz_head
 tests/zz_tail
 tests/zz_foreach
+tests/zz_cmp
+tests/zz_copy
 examples/calc.c
 examples/math.c
 examples/lisp.c

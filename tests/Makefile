@@ -12,6 +12,8 @@ tests += zz_cast
 tests += zz_head
 tests += zz_tail
 tests += zz_foreach
+tests += zz_cmp
+tests += zz_copy
 
 deps = $(addprefix .obj/,$(addsuffix .d,tests))
 
@@ -31,6 +33,8 @@ zz_cast: .obj/zz_cast.o $(root_dir)src/libzebu2.a
 zz_head: .obj/zz_head.o $(root_dir)src/libzebu2.a
 zz_tail: .obj/zz_tail.o $(root_dir)src/libzebu2.a
 zz_foreach: .obj/zz_foreach.o $(root_dir)src/libzebu2.a
+zz_cmp: .obj/zz_cmp.o $(root_dir)src/libzebu2.a
+zz_copy: .obj/zz_copy.o $(root_dir)src/libzebu2.a
 
 ../src/libzebu2.a:
 	(call descend,../src,libzebu2.a)

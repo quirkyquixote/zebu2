@@ -12,6 +12,8 @@ struct zz_ast;
 
 struct zz_type {
         int (*serialize) (struct zz_ast *, FILE *);
+        struct zz_ast *(* copy)(struct zz_ast *);
+        int (* cmp)(struct zz_ast *, struct zz_ast *);
 };
 
 const struct zz_type *zz_pair_type(void);
@@ -35,6 +37,8 @@ static inline void *_zz_cast(const struct zz_type *t, struct zz_ast *a)
 
 #define zz_cast(_t, _a) ((struct _t*)_zz_cast(_t##_type(), _a))
 int zz_print(struct zz_ast *n, FILE * f);
+struct zz_ast *zz_copy(struct zz_ast *a);
+int zz_cmp(struct zz_ast *a, struct zz_ast *b);
 
 struct zz_pair {
         const struct zz_type *type;

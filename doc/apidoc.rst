@@ -18,6 +18,8 @@ functions to manipulate such data.
 **Member fields**
 ---------------------------------------------------------------------------
 :member:`~zz_type.serialize` prints to :type:`FILE`
+:member:`~zz_type.copy`      clones a node
+:member:`~zz_type.cmp`       compares two nodes
 ---------------------------- ----------------------------------------------
 **Related functions**
 ---------------------------------------------------------------------------
@@ -26,6 +28,21 @@ functions to manipulate such data.
 :func:`zz_ptr_type()`        returns type for atom nodes holding pointers
 :func:`zz_str_type()`        returns type for atom nodes holding strings
 ============================ ==============================================
+
+.. member:: int zz_type.serialize(struct zz_ast* a, FILE* f)
+
+   Print :data:`a` to :data:`f`, return number of characters.
+
+.. member:: struct zz_ast* zz_type.copy(struct zz_ast* a)
+
+   Creates a copy of :data:`a`; if :data:`a` is a pair, its head and tail are
+   copied recursively.
+
+.. member:: int zz_type.cmp(struct zz_ast* a, struct zz_ast* b)
+
+   Returns a number that is equal, less, or greater than zero if :data:`a` is
+   equal, less, or greater than :data:`b`, respectively; assumes :data:`a` and
+   :data:`b` to be of the same type.
 
 .. member:: int zz_type.serialize(struct zz_ast* a, FILE* f)
 
@@ -74,6 +91,8 @@ All nodes are allocated with the Boehms Garbage Collector.
 :func:`zz_typeof()`          get type of node
 :func:`zz_cast()`            cast node to type, or return NULL
 :func:`zz_print()`           serialize a node
+:func:`zz_copy()`            copy recursively
+:func:`zz_cmp()`             compare two nodes
 ============================ ==============================================
 
 .. member:: const struct zz_type* zz_ast.type
@@ -95,6 +114,19 @@ All nodes are allocated with the Boehms Garbage Collector.
 .. function:: int zz_print(struct zz_ast* n, FILE* f)
 
    Serialize :data:`n`, and write the result to :data:`f`
+
+.. function:: struct zz_ast* zz_copy(struct zz_ast* n)
+
+   Creates a copy of :data:`a`; if :data:`a` is a pair, its head and tail are
+   copied recursively.
+
+.. function:: int zz_cmp(struct zz_ast* a, struct zz_ast* b)
+
+   Returns a number that is equal, less, or greater than zero if :data:`a` is
+   equal, less, or greater than :data:`b`, respectively.
+   The comparison is performed in two steps: first, the types of both nodes are
+   compared, and only if they are equal, is the comparison function for that
+   type called for the nodes.
 
 Pair
 ----

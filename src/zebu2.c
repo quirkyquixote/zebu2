@@ -3,6 +3,57 @@
 
 #include <stdarg.h>
 
+struct zz_ast *copy_pair(struct zz_ast *a)
+{
+        struct zz_pair *x = (void *)a;
+        return zz_pair(zz_copy(x->head), zz_copy(x->tail));
+}
+struct zz_ast *copy_int(struct zz_ast *a)
+{
+        struct zz_int *x = (void *)a;
+        return zz_int(x->num);
+}
+struct zz_ast *copy_ptr(struct zz_ast *a)
+{
+        struct zz_ptr *x = (void *)a;
+        return zz_ptr(x->ptr);
+}
+struct zz_ast *copy_str(struct zz_ast *a)
+{
+        struct zz_str *x = (void *)a;
+        return zz_str(x->str);
+}
+
+int cmp_pair(struct zz_ast *a, struct zz_ast *b)
+{
+        struct zz_pair *x = (void *)a;
+        struct zz_pair *y = (void *)b;
+        int ret;
+        if ((ret = zz_cmp(x->head, y->head)) != 0)
+                return ret;
+        if ((ret = zz_cmp(x->tail, y->tail)) != 0)
+                return ret;
+        return 0;
+}
+int cmp_int(struct zz_ast *a, struct zz_ast *b)
+{
+        struct zz_int *x = (void *)a;
+        struct zz_int *y = (void *)b;
+        return x->num - y->num;
+}
+int cmp_ptr(struct zz_ast *a, struct zz_ast *b)
+{
+        struct zz_ptr *x = (void *)a;
+        struct zz_ptr *y = (void *)b;
+        return x->ptr - y->ptr;
+}
+int cmp_str(struct zz_ast *a, struct zz_ast *b)
+{
+        struct zz_str *x = (void *)a;
+        struct zz_str *y = (void *)b;
+        return strcmp(x->str, y->str);
+}
+
 int serialize_pair(struct zz_ast *a, FILE * f)
 {
         struct zz_pair *x = (void *)a;
@@ -37,7 +88,9 @@ int serialize_str(struct zz_ast *a, FILE * f)
 const struct zz_type *zz_pair_type(void)
 {
         static struct zz_type type = {
-                .serialize = serialize_pair
+                .serialize = serialize_pair,
+                .copy = copy_pair,
+                .cmp = cmp_pair,
         };
         return &type;
 }
@@ -45,7 +98,9 @@ const struct zz_type *zz_pair_type(void)
 const struct zz_type *zz_int_type(void)
 {
         static struct zz_type type = {
-                .serialize = serialize_int
+                .serialize = serialize_int,
+                .copy = copy_int,
+                .cmp = cmp_int,
         };
         return &type;
 }
@@ -53,7 +108,9 @@ const struct zz_type *zz_int_type(void)
 const struct zz_type *zz_ptr_type(void)
 {
         static struct zz_type type = {
-                .serialize = serialize_ptr
+                .serialize = serialize_ptr,
+                .copy = copy_ptr,
+                .cmp = cmp_ptr,
         };
         return &type;
 }
@@ -61,7 +118,9 @@ const struct zz_type *zz_ptr_type(void)
 const struct zz_type *zz_str_type(void)
 {
         static struct zz_type type = {
-                .serialize = serialize_str
+                .serialize = serialize_str,
+                .copy = copy_str,
+                .cmp = cmp_str,
         };
         return &type;
 }
@@ -130,6 +189,18 @@ int zz_print(struct zz_ast *n, FILE * f)
                 ret += n->type->serialize(n, f);
         }
         return ret;
+}
+
+struct zz_ast *zz_copy(struct zz_ast *a)
+{
+        return a->type->copy(a);
+}
+int zz_cmp(struct zz_ast *a, struct zz_ast *b)
+{
+        int ret = a->type - b->type;
+        if (ret != 0)
+                return ret;
+        return a->type->cmp(a, b);
 }
 
 struct zz_list _zz_list(struct zz_ast *first, ...)
