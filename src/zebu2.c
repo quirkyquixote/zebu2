@@ -146,6 +146,38 @@ struct zz_ast *zz_tail(struct zz_ast *a)
         return p == NULL ? NULL : p->tail;
 }
 
+struct zz_ast *zz_insert(struct zz_ast *a, struct zz_ast *next)
+{
+        struct zz_pair *p = zz_cast(zz_pair, a);
+        return (p->tail = zz_pair(next, p->tail));
+}
+
+int _zz_unpack(struct zz_ast *list, ...)
+{
+        int ret = -1;
+        va_list ap;
+        va_start(ap, list);
+        struct zz_ast *x, *y;
+        zz_foreach(x, list) {
+                if ((y = va_arg(ap, void *)) == NULL)
+                        goto cleanup;
+                *(struct zz_ast **)y = x;
+        }
+        if ((y = va_arg(ap, void *)) != NULL)
+                goto cleanup;
+        ret = 0;
+cleanup:
+        va_end(ap);
+        return ret;
+}
+
+struct zz_ast *zz_index(struct zz_ast *a, int i)
+{
+        while (i--)
+                a = zz_tail(a);
+        return zz_head(a);
+}
+
 struct zz_ast *zz_int(int num)
 {
         struct zz_int *a = GC_malloc_atomic(sizeof(*a));
@@ -220,36 +252,19 @@ struct zz_list _zz_list(struct zz_ast *first, ...)
 
 struct zz_list zz_append(struct zz_list l, struct zz_ast *a)
 {
-        struct zz_ast *last = zz_pair(a, NULL);
-        if (l.first)
-                l.last = zz_cast(zz_pair, l.last)->tail = last;
+        if (l.last)
+                l.last = zz_insert(l.last, a);
         else
-                l.first = l.last = last;
+                l.last = zz_pair(a, NULL);
+        if (l.first == NULL)
+                l.first = l.last;
         return l;
 }
 
-int _zz_unpack(struct zz_ast *list, ...)
+struct zz_list zz_prepend(struct zz_list l, struct zz_ast *a)
 {
-        int ret = -1;
-        va_list ap;
-        va_start(ap, list);
-        struct zz_ast *x, *y;
-        zz_foreach(x, list) {
-                if ((y = va_arg(ap, void *)) == NULL)
-                        goto cleanup;
-                *(struct zz_ast **)y = x;
-        }
-        if ((y = va_arg(ap, void *)) != NULL)
-                goto cleanup;
-        ret = 0;
-cleanup:
-        va_end(ap);
-        return ret;
-}
-
-struct zz_ast *zz_index(struct zz_ast *a, int i)
-{
-        while (i--)
-                a = zz_tail(a);
-        return zz_head(a);
+        l.first = zz_pair(a, l.first);
+        if (l.last == NULL)
+                l.last = l.first;
+        return l;
 }

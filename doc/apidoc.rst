@@ -152,6 +152,7 @@ head, that can be another list) and the next element (the tail).
 :func:`zz_pair()`              create new pair
 :func:`zz_head()`              return head
 :func:`zz_tail()`              return tail
+:func:`zz_insert()`            insert element after
 :func:`zz_foreach()`           iterate on a list of pairs
 :func:`zz_unpack()`            extract all list elements
 :func:`zz_index()`             return nth element
@@ -180,6 +181,11 @@ head, that can be another list) and the next element (the tail).
 .. function:: struct zz_ast* zz_tail(struct zz_ast* a)
 
    Return tail if :data:`a` is pair, :data:`NULL` otherwise.
+
+.. function:: struct zz_ast* zz_insert(struct zz_ast* a, struct zz_ast* next)
+
+   Insert :data:`next` after :data:`a`; returns newly cleated :type:`zz_pair`
+   object whose head is :data:`next`.
 
 .. function:: void zz_foreach(struct zz_ast* x, struct zz_ast* head)
 
@@ -314,6 +320,7 @@ Utilities to build lists.
 ---------------------------------------------------------------------------
 :func:`zz_list()`              create list
 :func:`zz_append()`            append element to list
+:func:`zz_prepend()`           prepend element to list
 ============================== ============================================
 
 .. member:: struct zz_ast* zz_list.first
@@ -334,4 +341,8 @@ Utilities to build lists.
 .. function:: struct zz_list zz_append(struct zz_list l, struct zz_ast* a)
 
    Append an element to an existing list.
+
+.. function:: struct zz_list zz_prepend(struct zz_list l, struct zz_ast* a)
+
+   Prepend an element to an existing list.
 

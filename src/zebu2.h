@@ -49,6 +49,7 @@ struct zz_pair {
 struct zz_ast *zz_pair(struct zz_ast *head, struct zz_ast *tail);
 struct zz_ast *zz_head(struct zz_ast *a);
 struct zz_ast *zz_tail(struct zz_ast *a);
+struct zz_ast *zz_insert(struct zz_ast *a, struct zz_ast *next);
 int _zz_unpack(struct zz_ast *list, ...);
 #define zz_unpack(...) _zz_unpack(__VA_ARGS__, NULL)
 struct zz_ast *zz_index(struct zz_ast *a, int i);
@@ -86,5 +87,6 @@ struct zz_list {
 struct zz_list _zz_list(struct zz_ast *first, ...);
 #define zz_list(...) _zz_list(__VA_ARGS__, NULL)
 struct zz_list zz_append(struct zz_list l, struct zz_ast *a);
+struct zz_list zz_prepend(struct zz_list l, struct zz_ast *a);
 
 #endif                          // _ZEBU_H
