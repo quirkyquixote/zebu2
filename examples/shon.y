@@ -182,12 +182,12 @@ line
 statement_list
     : statement_list ';' statement { $$ = zz_append($1, $3.first); }
     | statement { $$ = zz_list($1.first); }
-    | { $$ = zz_list(NULL); }
+    | { $$ = zz_list_empty(); }
     ;
 
 statement
     : statement expression { $$ = zz_append($1, $2); }
-    | { $$ = zz_list(NULL); }
+    | { $$ = zz_list_empty(); }
     ;
 
 expression

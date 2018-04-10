@@ -45,7 +45,7 @@ expr
 
 list
    : list expr { $$ = zz_append($1, $2); }
-   | { $$ = zz_list(NULL); }
+   | { $$ = zz_list_empty(); }
    ;
 
 %%

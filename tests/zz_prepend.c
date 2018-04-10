@@ -9,7 +9,7 @@ int main(int argc, char *argv[])
         GC_init();
 
         {
-                struct zz_list l = zz_list(NULL);
+                struct zz_list l = zz_list_empty();
                 char buf[1024];
                 struct zz_ast *i;
                 strcpy(buf, "");
@@ -18,7 +18,7 @@ int main(int argc, char *argv[])
                 assert(strcmp(buf, "") == 0);
         }
         {
-                struct zz_list l = zz_list(NULL);
+                struct zz_list l = zz_list_empty();
                 l = zz_prepend(l, zz_str("foo"));
                 char buf[1024];
                 struct zz_ast *i;
@@ -28,7 +28,7 @@ int main(int argc, char *argv[])
                 assert(strcmp(buf, "foo") == 0);
         }
         {
-                struct zz_list l = zz_list(NULL);
+                struct zz_list l = zz_list_empty();
                 l = zz_prepend(l, zz_str("test"));
                 l = zz_prepend(l, zz_str("a"));
                 l = zz_prepend(l, zz_str("is"));
