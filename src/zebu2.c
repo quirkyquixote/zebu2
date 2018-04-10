@@ -170,7 +170,8 @@ int _zz_unpack(struct zz_ast *list, ...)
         zz_foreach(x, list) {
                 if ((y = va_arg(ap, void *)) == zz_arg_list_end())
                         goto cleanup;
-                *(struct zz_ast **)y = x;
+                if (y != NULL)
+                        *(struct zz_ast **)y = x;
         }
         if ((y = va_arg(ap, void *)) != zz_arg_list_end())
                 goto cleanup;

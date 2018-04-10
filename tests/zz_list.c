@@ -9,7 +9,7 @@ int main(int argc, char *argv[])
         GC_init();
 
         {
-                struct zz_list l = zz_list();
+                struct zz_list l = zz_list_empty();
                 struct zz_ast *r = NULL;
                 assert(zz_cmp(l.first, r) == 0);
         }

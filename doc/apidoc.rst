@@ -199,7 +199,8 @@ head, that can be another list) and the next element (the tail).
 .. function:: int zz_unpack(struct zz_ast* a, ...)
 
    Extract all elements from a list. Every argument after the first one must be
-   a pointer to :type:`struct zz_ast*` where the element can be stored.
+   a pointer to :type:`struct zz_ast*` where the element can be stored; if an
+   argument is NULL, that particular value in the list is not returned.
    Implemented as a macro that appends :func:`zz_arg_list_end()` to the element
    list and calls the actual function.
 
