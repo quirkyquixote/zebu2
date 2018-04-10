@@ -59,8 +59,7 @@ int serialize_pair(struct zz_ast *a, FILE * f)
 {
         struct zz_pair *x = (void *)a;
         int ret = 0;
-        if (x->head)
-                ret += zz_print(x->head, f);
+        ret += zz_print(x->head, f);
         if (x->tail) {
                 fputc(' ', f);
                 ret += x->tail->type->serialize(x->tail, f);
