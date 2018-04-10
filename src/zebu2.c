@@ -168,11 +168,11 @@ int _zz_unpack(struct zz_ast *list, ...)
         va_start(ap, list);
         struct zz_ast *x, *y;
         zz_foreach(x, list) {
-                if ((y = va_arg(ap, void *)) == NULL)
+                if ((y = va_arg(ap, void *)) == zz_arg_list_end())
                         goto cleanup;
                 *(struct zz_ast **)y = x;
         }
-        if ((y = va_arg(ap, void *)) != NULL)
+        if ((y = va_arg(ap, void *)) != zz_arg_list_end())
                 goto cleanup;
         ret = 0;
 cleanup:
@@ -244,18 +244,21 @@ int zz_cmp(struct zz_ast *a, struct zz_ast *b)
         return a->type->cmp(a, b);
 }
 
+struct zz_list zz_list_empty(void)
+{
+        return (struct zz_list){NULL, NULL};
+}
+
 struct zz_list _zz_list(struct zz_ast *first, ...)
 {
-        struct zz_list ret = (struct zz_list){NULL, NULL};
-        if (first != NULL) {
-                ret = zz_append(ret, first);
-                va_list ap;
-                va_start(ap, first);
-                struct zz_ast *a;
-                while ((a = va_arg(ap, void *)) != NULL)
-                        ret = zz_append(ret, a);
-                va_end(ap);
-        }
+        struct zz_list ret;
+        ret.first = ret.last = zz_pair(first, NULL);
+        va_list ap;
+        va_start(ap, first);
+        struct zz_ast *a;
+        while ((a = va_arg(ap, void *)) != zz_arg_list_end())
+                ret = zz_append(ret, a);
+        va_end(ap);
         return ret;
 }
 
@@ -288,3 +291,10 @@ struct zz_list zz_merge(struct zz_list l, struct zz_list r)
         l.last = r.last;
         return l;
 }
+
+void *zz_arg_list_end(void)
+{
+        static struct {} val;
+        return &val;
+}
+

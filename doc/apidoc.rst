@@ -200,8 +200,8 @@ head, that can be another list) and the next element (the tail).
 
    Extract all elements from a list. Every argument after the first one must be
    a pointer to :type:`struct zz_ast*` where the element can be stored.
-   Implemented as a macro that appends :data:`NULL` to the element list and
-   calls the actual function.
+   Implemented as a macro that appends :func:`zz_arg_list_end()` to the element
+   list and calls the actual function.
 
 .. function:: struct zz_ast* zz_index(struct zz_ast* a, int i)
 
@@ -324,6 +324,7 @@ Utilities to build lists.
 **Related functions**
 ---------------------------------------------------------------------------
 :func:`zz_list()`              create list
+:func:`zz_list_empty()`        create list
 :func:`zz_append()`            append element to list
 :func:`zz_prepend()`           prepend element to list
 :func:`zz_merge()`             merge lists
@@ -337,12 +338,15 @@ Utilities to build lists.
 
    Pointer to the last element of a list, or NULL.
 
+.. function:: struct zz_list zz_list_empty(void)
+
+   Construct empty list.
+
 .. function:: struct zz_list zz_list(struct zz_ast* first, ...)
 
    Construct list from elements list.
-   Implemented as a macro that appends :data:`NULL` to the element list and
-   calls the actual function.
-   To create an empty list, pass :data:`NULL` as the only element.
+   Implemented as a macro that appends :func:`zz_arg_list_end()` to the element
+   list and calls the actual function.
 
 .. function:: struct zz_list zz_append(struct zz_list l, struct zz_ast* a)
 
