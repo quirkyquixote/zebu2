@@ -17,6 +17,7 @@ tests += zz_copy
 tests += zz_index
 tests += zz_list
 tests += zz_append
+tests += zz_prepend
 tests += zz_merge
 
 deps = $(addprefix .obj/,$(addsuffix .d,tests))
@@ -42,6 +43,7 @@ zz_copy: .obj/zz_copy.o $(root_dir)src/libzebu2.a
 zz_index: .obj/zz_index.o $(root_dir)src/libzebu2.a
 zz_list: .obj/zz_list.o $(root_dir)src/libzebu2.a
 zz_append: .obj/zz_append.o $(root_dir)src/libzebu2.a
+zz_prepend: .obj/zz_prepend.o $(root_dir)src/libzebu2.a
 zz_merge: .obj/zz_merge.o $(root_dir)src/libzebu2.a
 
 ../src/libzebu2.a:

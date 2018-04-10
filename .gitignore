@@ -16,6 +16,7 @@ tests/zz_copy
 tests/zz_index
 tests/zz_list
 tests/zz_append
+tests/zz_prepend
 tests/zz_merge
 examples/calc.c
 examples/math.c
