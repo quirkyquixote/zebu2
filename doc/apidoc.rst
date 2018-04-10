@@ -326,6 +326,7 @@ Utilities to build lists.
 :func:`zz_list()`              create list
 :func:`zz_append()`            append element to list
 :func:`zz_prepend()`           prepend element to list
+:func:`zz_merge()`             merge lists
 ============================== ============================================
 
 .. member:: struct zz_ast* zz_list.first
@@ -350,4 +351,8 @@ Utilities to build lists.
 .. function:: struct zz_list zz_prepend(struct zz_list l, struct zz_ast* a)
 
    Prepend an element to an existing list.
+
+.. function:: struct zz_list zz_merge(struct zz_list l, struct zz_list r)
+
+   Merge two lists; the input values are invalidated.
 

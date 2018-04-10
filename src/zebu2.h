@@ -89,5 +89,6 @@ struct zz_list _zz_list(struct zz_ast *first, ...);
 #define zz_list(...) _zz_list(__VA_ARGS__, NULL)
 struct zz_list zz_append(struct zz_list l, struct zz_ast *a);
 struct zz_list zz_prepend(struct zz_list l, struct zz_ast *a);
+struct zz_list zz_merge(struct zz_list l, struct zz_list r);
 
 #endif                          // _ZEBU_H
