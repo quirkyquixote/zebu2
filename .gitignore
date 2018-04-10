@@ -14,6 +14,7 @@ tests/zz_foreach
 tests/zz_cmp
 tests/zz_copy
 tests/zz_index
+tests/zz_list
 tests/zz_append
 tests/zz_merge
 examples/calc.c
