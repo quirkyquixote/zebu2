@@ -15,18 +15,15 @@ struct zz_ast *copy_pair(struct zz_ast *a)
 }
 struct zz_ast *copy_int(struct zz_ast *a)
 {
-        struct zz_int *x = (void *)a;
-        return zz_int(x->num);
+        return a;
 }
 struct zz_ast *copy_ptr(struct zz_ast *a)
 {
-        struct zz_ptr *x = (void *)a;
-        return zz_ptr(x->ptr);
+        return a;
 }
 struct zz_ast *copy_str(struct zz_ast *a)
 {
-        struct zz_str *x = (void *)a;
-        return zz_str(x->str);
+        return a;
 }
 
 int cmp_null(struct zz_ast *a, struct zz_ast *b)
