@@ -6,9 +6,9 @@ typedef int (operator)(struct zz_ast*);
 int eval(struct zz_ast *a)
 {
         if (a->type == zz_int_type()) {
-                return zz_cast(zz_int, a)->num;
+                return zz_cast_or_die(zz_int, a)->num;
         } else if (a->type == zz_pair_type()) {
-                operator *op = zz_cast(zz_ptr, zz_head(a))->ptr;
+                operator *op = zz_cast_or_die(zz_ptr, zz_head(a))->ptr;
                 return op(zz_tail(a));
         } else {
                 abort();

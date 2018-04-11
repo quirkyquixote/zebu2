@@ -14,7 +14,7 @@ int main(int argc, char *argv[])
                 struct zz_ast *i;
                 strcpy(buf, "");
                 zz_foreach(i, l.first)
-                        strcat(buf, zz_cast(zz_str, i)->str);
+                        strcat(buf, zz_cast_or_die(zz_str, i)->str);
                 assert(strcmp(buf, "") == 0);
         }
         {
@@ -24,7 +24,7 @@ int main(int argc, char *argv[])
                 struct zz_ast *i;
                 strcpy(buf, "");
                 zz_foreach(i, l.first)
-                        strcat(buf, zz_cast(zz_str, i)->str);
+                        strcat(buf, zz_cast_or_die(zz_str, i)->str);
                 assert(strcmp(buf, "foo") == 0);
         }
         {
@@ -37,7 +37,7 @@ int main(int argc, char *argv[])
                 struct zz_ast *i;
                 strcpy(buf, "");
                 zz_foreach(i, l.first)
-                        strcat(buf, zz_cast(zz_str, i)->str);
+                        strcat(buf, zz_cast_or_die(zz_str, i)->str);
                 assert(strcmp(buf, "thisisatest") == 0);
         }
 }

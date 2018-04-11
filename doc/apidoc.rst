@@ -70,7 +70,8 @@ AST
 Handler for all nodes of the AST. Usually, no actual instances of
 :type:`zz_ast` exist, but a number of other types (:type:`zz_int`,
 :type:`zz_ptr`, :type:`zz_str`, :type:`zz_pair`) share the same first field, so
-they can be handled through pointers to this type; see :func:`zz_cast()`.
+they can be handled through pointers to this type; see :func:`zz_cast_or_die()`,
+:func:`zz_cast_or_null()`.
 
 The :member:`~zz_ast.type` field determines what the actual object is and how
 the data may be manipulated;
@@ -89,7 +90,8 @@ All nodes are allocated with the Boehms Garbage Collector.
 **Related functions**
 ---------------------------------------------------------------------------
 :func:`zz_typeof()`          get type of node
-:func:`zz_cast()`            cast node to type, or return NULL
+:func:`zz_cast_or_die()`     cast node to type, or abort program
+:func:`zz_cast_or_null()`    cast node to type, or return NULL
 :func:`zz_print()`           serialize a node
 :func:`zz_copy()`            copy recursively
 :func:`zz_cmp()`             compare two nodes
@@ -103,12 +105,18 @@ All nodes are allocated with the Boehms Garbage Collector.
 
    Return type of node; if :data:`a` is :data:`NULL`, return :data:`NULL`.
 
-.. function:: TYPE zz_cast(TYPE, struct zz_ast* a)
+.. function:: TYPE zz_cast_or_die(TYPE, struct zz_ast* a)
+              TYPE zz_cast_or_null(TYPE, struct zz_ast* a)
 
    If :data:`a` is of type :func:`TYPE_type()`, return :data:`a` cast to
-   :type:`struct TYPE`, else return :data:`NULL`.
+   :type:`struct TYPE`; if not, each function handles errors differently:
    
-   This is implemented as a macro that depends on the names of
+   - :func:`zz_cast_or_die()` calls :func:`abort()` after printing a message to
+     :data:`stderr`.
+
+   - :func:`zz_cast_or_null()` returns :data:`NULL`.
+
+   These functions are implemented as macros that depend on the names of
    :func:`TYPE_type()` and :type:`struct TYPE` matching.
 
 .. function:: int zz_print(struct zz_ast* n, FILE* f)

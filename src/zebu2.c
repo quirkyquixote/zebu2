@@ -88,6 +88,7 @@ int serialize_str(struct zz_ast *a, FILE * f)
 const struct zz_type *zz_pair_type(void)
 {
         static struct zz_type type = {
+                .name = "zz_pair",
                 .serialize = serialize_pair,
                 .copy = copy_pair,
                 .cmp = cmp_pair,
@@ -98,6 +99,7 @@ const struct zz_type *zz_pair_type(void)
 const struct zz_type *zz_int_type(void)
 {
         static struct zz_type type = {
+                .name = "zz_int",
                 .serialize = serialize_int,
                 .copy = copy_int,
                 .cmp = cmp_int,
@@ -108,6 +110,7 @@ const struct zz_type *zz_int_type(void)
 const struct zz_type *zz_ptr_type(void)
 {
         static struct zz_type type = {
+                .name = "zz_ptr",
                 .serialize = serialize_ptr,
                 .copy = copy_ptr,
                 .cmp = cmp_ptr,
@@ -118,6 +121,7 @@ const struct zz_type *zz_ptr_type(void)
 const struct zz_type *zz_str_type(void)
 {
         static struct zz_type type = {
+                .name = "zz_str",
                 .serialize = serialize_str,
                 .copy = copy_str,
                 .cmp = cmp_str,
@@ -136,27 +140,25 @@ struct zz_ast *zz_pair(struct zz_ast *head, struct zz_ast *tail)
 
 struct zz_ast *zz_head(struct zz_ast *a)
 {
-        struct zz_pair *p = zz_cast(zz_pair, a);
+        struct zz_pair *p = zz_cast_or_null(zz_pair, a);
         return p == NULL ? a : p->head;
 }
 
 struct zz_ast *zz_tail(struct zz_ast *a)
 {
-        struct zz_pair *p = zz_cast(zz_pair, a);
+        struct zz_pair *p = zz_cast_or_null(zz_pair, a);
         return p == NULL ? NULL : p->tail;
 }
 
 struct zz_ast *zz_insert(struct zz_ast *a, struct zz_ast *next)
 {
-        struct zz_pair *p = zz_cast(zz_pair, a);
-        assert(p != NULL);
+        struct zz_pair *p = zz_cast_or_die(zz_pair, a);
         return (p->tail = zz_pair(next, p->tail));
 }
 
 void zz_replace(struct zz_ast *a, struct zz_ast *head)
 {
-        struct zz_pair *p = zz_cast(zz_pair, a);
-        assert(p != NULL);
+        struct zz_pair *p = zz_cast_or_die(zz_pair, a);
         p->head = head;
 }
 
@@ -222,7 +224,7 @@ int zz_print(struct zz_ast *n, FILE * f)
         int ret = 0;
         if (n == NULL) {
                 ret += fprintf(f, "()");
-        } else if (zz_cast(zz_pair, n)) {
+        } else if (zz_typeof(n) == zz_pair_type()) {
                 fputc('(', f);
                 ret += n->type->serialize(n, f);
                 fputc(')', f);
@@ -287,7 +289,7 @@ struct zz_list zz_merge(struct zz_list l, struct zz_list r)
                 return l;
         if (l.first == NULL)
                 return r;
-        zz_cast(zz_pair, l.last)->tail = r.first;
+        zz_cast_or_die(zz_pair, l.last)->tail = r.first;
         l.last = r.last;
         return l;
 }
