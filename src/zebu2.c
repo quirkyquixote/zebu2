@@ -4,6 +4,10 @@
 #include <assert.h>
 #include <stdarg.h>
 
+struct zz_ast *copy_null(struct zz_ast *a)
+{
+        return NULL;
+}
 struct zz_ast *copy_pair(struct zz_ast *a)
 {
         struct zz_pair *x = (void *)a;
@@ -25,6 +29,10 @@ struct zz_ast *copy_str(struct zz_ast *a)
         return zz_str(x->str);
 }
 
+int cmp_null(struct zz_ast *a, struct zz_ast *b)
+{
+        return 0;
+}
 int cmp_pair(struct zz_ast *a, struct zz_ast *b)
 {
         struct zz_pair *x = (void *)a;
@@ -55,6 +63,10 @@ int cmp_str(struct zz_ast *a, struct zz_ast *b)
         return strcmp(x->str, y->str);
 }
 
+int serialize_null(struct zz_ast *a, FILE * f)
+{
+        return fprintf(f, "()");
+}
 int serialize_pair(struct zz_ast *a, FILE * f)
 {
         struct zz_pair *x = (void *)a;
@@ -62,7 +74,7 @@ int serialize_pair(struct zz_ast *a, FILE * f)
         ret += zz_print(x->head, f);
         if (x->tail) {
                 fputc(' ', f);
-                ret += x->tail->type->serialize(x->tail, f);
+                ret += zz_typeof(x->tail)->serialize(x->tail, f);
         }
         return ret;
 }
@@ -83,6 +95,17 @@ int serialize_str(struct zz_ast *a, FILE * f)
 {
         struct zz_str *x = (void *)a;
         return fprintf(f, "%s", x->str);
+}
+
+const struct zz_type *zz_null_type(void)
+{
+        static struct zz_type type = {
+                .name = "zz_null",
+                .serialize = serialize_null,
+                .copy = copy_null,
+                .cmp = cmp_null,
+        };
+        return &type;
 }
 
 const struct zz_type *zz_pair_type(void)
@@ -220,28 +243,26 @@ struct zz_ast *zz_str(const char *str)
 int zz_print(struct zz_ast *n, FILE * f)
 {
         int ret = 0;
-        if (n == NULL) {
-                ret += fprintf(f, "()");
-        } else if (zz_typeof(n) == zz_pair_type()) {
+        if (zz_typeof(n) == zz_pair_type()) {
                 fputc('(', f);
-                ret += n->type->serialize(n, f);
+                ret += zz_typeof(n)->serialize(n, f);
                 fputc(')', f);
         } else {
-                ret += n->type->serialize(n, f);
+                ret += zz_typeof(n)->serialize(n, f);
         }
         return ret;
 }
 
 struct zz_ast *zz_copy(struct zz_ast *a)
 {
-        return a->type->copy(a);
+        return zz_typeof(a)->copy(a);
 }
 int zz_cmp(struct zz_ast *a, struct zz_ast *b)
 {
-        int ret = a->type - b->type;
+        int ret = zz_typeof(a) - zz_typeof(b);
         if (ret != 0)
                 return ret;
-        return a->type->cmp(a, b);
+        return zz_typeof(a)->cmp(a, b);
 }
 
 struct zz_list zz_list_empty(void)

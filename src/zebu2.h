@@ -17,6 +17,7 @@ struct zz_type {
         int (* cmp)(struct zz_ast *, struct zz_ast *);
 };
 
+const struct zz_type *zz_null_type(void);
 const struct zz_type *zz_pair_type(void);
 const struct zz_type *zz_int_type(void);
 const struct zz_type *zz_ptr_type(void);
@@ -28,14 +29,14 @@ struct zz_ast {
 
 static inline const struct zz_type *zz_typeof(struct zz_ast *a)
 {
-        return a == NULL ? NULL : a->type;
+        return a == NULL ? zz_null_type() : a->type;
 }
 
 static inline void *_zz_cast(const struct zz_type *t, struct zz_ast *a)
 {
         if (zz_typeof(a) != t) {
                 fprintf(stderr, "fatal: bad zz_cast. expected %s, got %s\n",
-                                t->name, a ? zz_typeof(a)->name : "NULL");
+                                t->name, zz_typeof(a)->name);
                 abort();
         }
         return a;
@@ -69,6 +70,8 @@ struct zz_ast *zz_index(struct zz_ast *a, int i);
 
 #define zz_foreach(_x, _head) \
 for (struct zz_ast* _i = _head; _x = zz_head(_i), _i; _i = zz_tail(_i))
+
+struct zz_ast *zz_null(void);
 
 struct zz_int {
         const struct zz_type *type;

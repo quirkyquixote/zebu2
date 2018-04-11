@@ -17,17 +17,23 @@ functions to manipulate such data.
 ============================ ==============================================
 **Member fields**
 ---------------------------------------------------------------------------
+:member:`~zz_type.name`      used in error messages
 :member:`~zz_type.serialize` prints to :type:`FILE`
 :member:`~zz_type.copy`      clones a node
 :member:`~zz_type.cmp`       compares two nodes
 ---------------------------- ----------------------------------------------
 **Related functions**
 ---------------------------------------------------------------------------
+:func:`zz_null_type()`       returns type for null nodes
 :func:`zz_pair_type()`       returns type for pair nodes
 :func:`zz_int_type()`        returns type for atom nodes holding integes
 :func:`zz_ptr_type()`        returns type for atom nodes holding pointers
 :func:`zz_str_type()`        returns type for atom nodes holding strings
 ============================ ==============================================
+
+.. member:: const char* zz_type.name
+
+   Name of the type, used in error messages.
 
 .. member:: int zz_type.serialize(struct zz_ast* a, FILE* f)
 
@@ -47,6 +53,10 @@ functions to manipulate such data.
 .. member:: int zz_type.serialize(struct zz_ast* a, FILE* f)
 
    Print :data:`a` to :data:`f`, return number of characters.
+
+.. function:: const struct zz_type* zz_null_type(void)
+
+   Return type for null nodes.
 
 .. function:: const struct zz_type* zz_pair_type(void)
 
