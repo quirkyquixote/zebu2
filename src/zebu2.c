@@ -152,13 +152,13 @@ struct zz_ast *zz_tail(struct zz_ast *a)
 
 struct zz_ast *zz_insert(struct zz_ast *a, struct zz_ast *next)
 {
-        struct zz_pair *p = zz_cast_or_die(zz_pair, a);
+        struct zz_pair *p = zz_cast(zz_pair, a);
         return (p->tail = zz_pair(next, p->tail));
 }
 
 void zz_replace(struct zz_ast *a, struct zz_ast *head)
 {
-        struct zz_pair *p = zz_cast_or_die(zz_pair, a);
+        struct zz_pair *p = zz_cast(zz_pair, a);
         p->head = head;
 }
 
@@ -289,7 +289,7 @@ struct zz_list zz_merge(struct zz_list l, struct zz_list r)
                 return l;
         if (l.first == NULL)
                 return r;
-        zz_cast_or_die(zz_pair, l.last)->tail = r.first;
+        zz_cast(zz_pair, l.last)->tail = r.first;
         l.last = r.last;
         return l;
 }

@@ -32,7 +32,7 @@ struct zz_ast *eval(struct zz_ast *a)
                 return a;
         if (zz_head(a)->type != zz_fun_type())
                 return a;
-        return zz_cast_or_die(zz_fun, zz_head(a))->fun(zz_tail(a));
+        return zz_cast(zz_fun, zz_head(a))->fun(zz_tail(a));
 }
 
 struct zz_ast *op_set(struct zz_ast *a)

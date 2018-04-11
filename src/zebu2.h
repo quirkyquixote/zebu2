@@ -31,7 +31,7 @@ static inline const struct zz_type *zz_typeof(struct zz_ast *a)
         return a == NULL ? NULL : a->type;
 }
 
-static inline void *_zz_cast_or_die(const struct zz_type *t, struct zz_ast *a)
+static inline void *_zz_cast(const struct zz_type *t, struct zz_ast *a)
 {
         if (zz_typeof(a) != t) {
                 fprintf(stderr, "fatal: bad zz_cast. expected %s, got %s\n",
@@ -46,7 +46,7 @@ static inline void *_zz_cast_or_null(const struct zz_type *t, struct zz_ast *a)
         return zz_typeof(a) == t ? a : NULL;
 }
 
-#define zz_cast_or_die(_t, _a) ((struct _t*)_zz_cast_or_die(_t##_type(), _a))
+#define zz_cast(_t, _a) ((struct _t*)_zz_cast(_t##_type(), _a))
 #define zz_cast_or_null(_t, _a) ((struct _t*)_zz_cast_or_null(_t##_type(), _a))
 int zz_print(struct zz_ast *n, FILE * f);
 struct zz_ast *zz_copy(struct zz_ast *a);
