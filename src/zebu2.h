@@ -35,7 +35,7 @@ static inline void *_zz_cast(const struct zz_type *t, struct zz_ast *a)
 {
         if (zz_typeof(a) != t) {
                 fprintf(stderr, "fatal: bad zz_cast. expected %s, got %s\n",
-                                t->name, zz_typeof(a)->name);
+                                t->name, a ? zz_typeof(a)->name : "NULL");
                 abort();
         }
         return a;

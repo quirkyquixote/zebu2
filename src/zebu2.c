@@ -164,7 +164,7 @@ void zz_replace(struct zz_ast *a, struct zz_ast *head)
 
 int _zz_unpack(struct zz_ast *list, ...)
 {
-        int ret = -1;
+        int ret = 0;
         va_list ap;
         va_start(ap, list);
         struct zz_ast *x, *y;
@@ -173,10 +173,8 @@ int _zz_unpack(struct zz_ast *list, ...)
                         goto cleanup;
                 if (y != NULL)
                         *(struct zz_ast **)y = x;
+                ++ret;
         }
-        if ((y = va_arg(ap, void *)) != zz_arg_list_end())
-                goto cleanup;
-        ret = 0;
 cleanup:
         va_end(ap);
         return ret;

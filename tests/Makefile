@@ -15,6 +15,7 @@ tests += zz_foreach
 tests += zz_cmp
 tests += zz_copy
 tests += zz_index
+tests += zz_unpack
 tests += zz_list
 tests += zz_append
 tests += zz_prepend
@@ -41,6 +42,7 @@ zz_foreach: .obj/zz_foreach.o $(root_dir)src/libzebu2.a
 zz_cmp: .obj/zz_cmp.o $(root_dir)src/libzebu2.a
 zz_copy: .obj/zz_copy.o $(root_dir)src/libzebu2.a
 zz_index: .obj/zz_index.o $(root_dir)src/libzebu2.a
+zz_unpack: .obj/zz_unpack.o $(root_dir)src/libzebu2.a
 zz_list: .obj/zz_list.o $(root_dir)src/libzebu2.a
 zz_append: .obj/zz_append.o $(root_dir)src/libzebu2.a
 zz_prepend: .obj/zz_prepend.o $(root_dir)src/libzebu2.a

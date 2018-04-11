@@ -212,6 +212,11 @@ head, that can be another list) and the next element (the tail).
    Implemented as a macro that appends :func:`zz_arg_list_end()` to the element
    list and calls the actual function.
 
+   Returns the number of elements read from :data:`a`, that can be less than
+   the number of requested elements if there are not enough elements in the
+   list, in which case, the value of the unassigned return locations after the
+   call is undefined.
+
 .. function:: struct zz_ast* zz_index(struct zz_ast* a, int i)
 
    Return :data:`i`-th element of the list whose handler is :data:`a`.
