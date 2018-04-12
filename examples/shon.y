@@ -11,10 +11,21 @@ int serialize_fun(struct zz_ast *a, FILE *f)
         struct zz_fun *x = (void *)a;
         return fprintf(f, "<fun:%p>", x->fun);
 }
+struct zz_ast *copy_fun(struct zz_ast *a)
+{
+        return a;
+}
+int cmp_fun(struct zz_ast *a, struct zz_ast *b)
+{
+        return b - a;
+}
 const struct zz_type *zz_fun_type()
 {
         static struct zz_type type = {
-                .serialize = serialize_fun
+                .name = "zz_fun",
+                .serialize = serialize_fun,
+                .copy = copy_fun,
+                .cmp = cmp_fun,
         };
         return &type;
 }
@@ -143,10 +154,12 @@ struct zz_ast *op_exp(struct zz_ast *a)
 %token OP_NE
 %token OP_GE
 %token OP_LE
-%token<ast> ATOM
+%token<ast> NUMBER
+%token<ast> STRING
 
 %type<list> statement_list
-%type<list> statement
+%type<ast> statement
+%type<list> expression_list
 %type<ast> expression
 %type<ast> assignment_expression
 %type<ast> assignment_operator
@@ -180,15 +193,21 @@ line
     ;
 
 statement_list
-    : statement_list ';' statement { $$ = zz_append($1, $3.first); }
-    | statement { $$ = zz_list($1.first); }
+    : statement_list ';' statement { $$ = zz_append($1, $3); }
+    | statement { $$ = zz_list($1); }
     | { $$ = zz_list_empty(); }
     ;
 
 statement
-    : statement expression { $$ = zz_append($1, $2); }
-    | { $$ = zz_list_empty(); }
+    : expression
+    | STRING expression_list { $$ = zz_pair($1, $2.first); }
+    | { $$ = NULL; }
     ;
+
+expression_list
+   : expression_list expression { $$ = zz_append($1, $2); }
+   | { $$ = zz_list_empty(); }
+   ;
 
 expression
    : assignment_expression
@@ -258,7 +277,8 @@ exponential_operator
     ;
 
 primary_expression
-    : ATOM
+    : NUMBER
+    | STRING
     | '(' statement_list ')' { $$ = $2.first; }
     ;
 
@@ -296,12 +316,12 @@ int yylex(YYSTYPE *lvalp, FILE *f)
                         } while (c == '_' || isalnum(c));
                         ungetc(c, f);
                         lvalp->ast = zz_str_with_len(buf, len);
-                        return ATOM;
+                        return STRING;
                  case '0'...'9':
                         ungetc(c, f);
                         fscanf(f, "%d", &c);
                         lvalp->ast = zz_int(c);
-                        return ATOM;
+                        return NUMBER;
                  case '"':
                         c = fgetc(f);
                         len = 0;
@@ -318,7 +338,7 @@ int yylex(YYSTYPE *lvalp, FILE *f)
                                 c = fgetc(f);
                         }
                         lvalp->ast = zz_str_with_len(buf, len);
-                        return ATOM;
+                        return STRING;
                  case '=':
                         c = fgetc(f);
                         if (c == '=')
