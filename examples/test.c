@@ -1,6 +1,7 @@
 
 #include "test.h"
 
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -11,20 +12,70 @@
 #include "readline/readline.h"
 #include "readline/history.h"
 
-char *slurp(FILE *f)
+void *array_index(struct array *a, int i)
 {
-        int size = 0;
-        int alloc = 2;
-        char *buf = GC_malloc_atomic(alloc);
-        int c;
-        while ((c = fgetc(f)) != EOF) {
-                buf[size++] = c;
-                if (size == alloc)
-                        buf = GC_realloc(buf, alloc *= 2);
-        }
-        buf[size++] = 0;
-        return buf;
+        return a->buf + i * a->siz;
 }
+void array_resize(struct array *a, int len)
+{
+        if (len > a->cap) {
+                if (a->cap == 0)
+                        a->cap = 2;
+                while (len > a->cap)
+                        a->cap *= 2;
+                a->buf = GC_realloc(a->buf, a->cap * a->siz);
+        }
+        a->len = len;
+}
+void array_clear(struct array *a)
+{
+        array_resize(a, 0);
+}
+void array_replace(struct array *a, int i, void *p)
+{
+        assert(i >= 0 && i < a->len);
+        memcpy(array_index(a, i), p, a->siz);
+}
+void array_insert(struct array *a, int i, void *p)
+{
+        assert(i >= 0 && i <= a->len);
+        array_resize(a, a->len + 1);
+        memmove(array_index(a, i + 1), array_index(a, i),
+                        (a->len - i - 1) * a->siz);
+        array_replace(a, i, p);
+}
+void array_erase(struct array *a, int i)
+{
+        assert(i >= 0 && i < a->len);
+        memmove(array_index(a, i), array_index(a, i + 1),
+                        (a->len - i - 1) * a->siz);
+        array_resize(a, a->len - 1);
+}
+void *array_front(struct array *a)
+{
+        return array_index(a, 0);
+}
+void *array_back(struct array *a)
+{
+        return array_index(a, a->len - 1);
+}
+void array_push_front(struct array *a, void *p)
+{
+        array_insert(a, 0, p);
+}
+void array_push_back(struct array *a, void *p)
+{
+        array_insert(a, a->len, p);
+}
+void array_pop_front(struct array *a)
+{
+        array_erase(a, 0);
+}
+void array_pop_back(struct array *a)
+{
+        array_erase(a, a->len - 1);
+}
+
 
 struct zz_ast *prune(struct zz_ast *a, int first)
 {
