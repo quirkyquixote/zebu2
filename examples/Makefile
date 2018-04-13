@@ -14,6 +14,7 @@ deps = $(addprefix .obj/,$(addsuffix .d,$(bins)))
 .PHONY: all
 all: $(bins)
 
+.INTERMEDIATE: $(addsuffix .c,$(bins))
 calc: .obj/calc.o .obj/test.o ../src/libzebu2.a
 math: .obj/math.o .obj/test.o ../src/libzebu2.a
 lisp: .obj/lisp.o .obj/test.o ../src/libzebu2.a

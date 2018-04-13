@@ -2,11 +2,6 @@
 *.d
 *.a
 *.so
-*.log
-examples/calc.c
-examples/math.c
-examples/lisp.c
-examples/shon.c
 examples/calc
 examples/math
 examples/lisp
