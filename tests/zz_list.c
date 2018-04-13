@@ -14,7 +14,7 @@ int main(int argc, char *argv[])
                 assert(zz_cmp(l.first, r) == 0);
         }
         {
-                struct zz_list l = zz_list_empty();
+                struct zz_list l = zz_list(NULL);
                 struct zz_ast *r = zz_pair(NULL, NULL);
                 assert(zz_cmp(l.first, r) == 0);
         }

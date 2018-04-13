@@ -24,13 +24,12 @@ tests += zz_merge
 deps = $(addprefix .obj/,$(addsuffix .d,tests))
 
 .PHONY: all
-all: $(addsuffix .log,$(tests))
+all: $(addsuffix .run,$(tests))
 
-%.log: % FORCE
-	$(QUIET_GEN)./$< &> $@
+%.run: % FORCE
+	$(QUIET_TEST)./$<
 
-FORCE:
-
+.INTERMEDIATE: $(tests)
 zz_int: .obj/zz_int.o $(root_dir)src/libzebu2.a
 zz_ptr: .obj/zz_ptr.o $(root_dir)src/libzebu2.a
 zz_str: .obj/zz_str.o $(root_dir)src/libzebu2.a
@@ -48,12 +47,13 @@ zz_append: .obj/zz_append.o $(root_dir)src/libzebu2.a
 zz_prepend: .obj/zz_prepend.o $(root_dir)src/libzebu2.a
 zz_merge: .obj/zz_merge.o $(root_dir)src/libzebu2.a
 
-../src/libzebu2.a:
-	(call descend,../src,libzebu2.a)
+$(root_dir)src/libzebu2.a:
+	(call descend,$(root_dir)src,libzebu2.a)
 
 .PHONY: clean
 clean:
-	$(RM) $(tests)
 	$(RM) -r .obj
+
+FORCE:
 
 -include $(deps)

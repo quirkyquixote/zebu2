@@ -22,7 +22,6 @@ localstatedir := $(prefix)/var/zebu
 # There are so many tools needed...
 
 CC ?= cc
-CXX ?= c++
 AR ?= ar
 YACC ?= yacc
 INSTALL ?= install
@@ -33,13 +32,11 @@ INSTALL_DATA := $(INSTALL) -m 644
 
 CPPFLAGS ?=
 CFLAGS ?= -g -Werror -Wfatal-errors
-CXXFLAGS ?= -g -Werror -Wfatal-errors
 LDFLAGS ?=
 
 # These flags are necessary
 
 ALL_CFLAGS := $(CPPFLAGS) $(CFLAGS)
-ALL_CXXFLAGS := $(CPPFLAGS) $(CXXFLAGS)
 ALL_LDFLAGS := $(LDFLAGS)
 
 ALL_CFLAGS += -std=gnu11
@@ -50,14 +47,6 @@ ALL_CFLAGS += -DLOCALSTATEDIR=\"$(localstatedir)\"
 ALL_CFLAGS += -MD
 ALL_CFLAGS += -fPIC
 
-ALL_CXXFLAGS += -std=c++17
-ALL_CXXFLAGS += -DVERSION=\"$(VERSION)\"
-ALL_CXXFLAGS += -DLIBDIR=\"$(libdir)\"
-ALL_CXXFLAGS += -DDATADIR=\"$(datadir)\"
-ALL_CXXFLAGS += -DLOCALSTATEDIR=\"$(localstatedir)\"
-ALL_CXXFLAGS += -MD
-ALL_CXXFLAGS += -fPIC
-
 # To go down a level $(call descend,directory[,target[,flags]])
 
 descend = make -C $(1) $(2) $(3)
@@ -66,7 +55,6 @@ descend = make -C $(1) $(2) $(3)
 
 ifneq ($(findstring s,$(filter-out --%,$(MAKEFLAGS))),)
     QUIET_CC = @echo CC $@;
-    QUIET_CXX = @echo CXX $@;
     QUIET_LINK = @echo LINK $@;
     QUIET_AR = @echo AR $@;
     QUIET_YACC = @echo YACC $@;
@@ -84,13 +72,13 @@ endif
 .obj/%.o: %.c | .obj
 	$(QUIET_CC)$(CC) $(ALL_CFLAGS) -c -o $@ $<
 
-.obj/%.o: %.cc | .obj
-	$(QUIET_CXX)$(CXX) $(ALL_CXXFLAGS) -c -o $@ $<
-
 .obj:
 	mkdir $@
 
 %: .obj/%.o
+	$(QUIET_CC)$(CC) $(ALL_CFLAGS) $(ALL_LDFLAGS) $^ -o $@
+
+%: %.c
 	$(QUIET_CC)$(CC) $(ALL_CFLAGS) $(ALL_LDFLAGS) $^ -o $@
 
 %.a:

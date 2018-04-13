@@ -20,27 +20,27 @@ int main(int argc, char *argv[])
 
         {
                 struct zz_ast *c = zz_copy(i0);
-                assert(c != i0 && zz_cmp(c, i0) == 0);
+                assert(c == i0 && zz_cmp(c, i0) == 0);
         }
         {
                 struct zz_ast *c = zz_copy(i1);
-                assert(c != i1 && zz_cmp(c, i1) == 0);
+                assert(c == i1 && zz_cmp(c, i1) == 0);
         }
         {
                 struct zz_ast *c = zz_copy(pnull);
-                assert(c != pnull && zz_cmp(c, pnull) == 0);
+                assert(c == pnull && zz_cmp(c, pnull) == 0);
         }
         {
                 struct zz_ast *c = zz_copy(pself);
-                assert(c != pself && zz_cmp(c, pself) == 0);
+                assert(c == pself && zz_cmp(c, pself) == 0);
         }
         {
                 struct zz_ast *c = zz_copy(sfoo);
-                assert(c != sfoo && zz_cmp(c, sfoo) == 0);
+                assert(c == sfoo && zz_cmp(c, sfoo) == 0);
         }
         {
                 struct zz_ast *c = zz_copy(sbar);
-                assert(c != sbar && zz_cmp(c, sbar) == 0);
+                assert(c == sbar && zz_cmp(c, sbar) == 0);
         }
         {
                 struct zz_ast *c = zz_copy(l0);
