@@ -54,9 +54,7 @@ list
 
 int yylex(YYSTYPE *lvalp, FILE *f)
 {
-        static int size = 0;
-        static int alloc = 0;
-        static char *buf = NULL;
+        static struct array buf = array(sizeof(char));
 
         for (;;) {
                 int c = fgetc(f);
@@ -78,34 +76,26 @@ int yylex(YYSTYPE *lvalp, FILE *f)
                         lvalp->ast = zz_int(c);
                         return ATOM;
                  case '"':
-                        size = 0;
+                        array_clear(&buf);
                         for (;;) {
                                 switch ((c = fgetc(f))) {
                                  case EOF:
                                         fprintf(stderr, "Unterminated string\n");
                                         abort();
                                  case '"':
-                                        lvalp->ast = zz_str_with_len(buf, size);
+                                        lvalp->ast = zz_str_with_len(buf.buf, buf.len);
                                         return ATOM;
                                 }
-                                if (size == alloc) {
-                                        alloc = alloc ? alloc * 2 : 2;
-                                        buf = realloc(buf, alloc);
-                                }
-                                buf[size++] = c;
+                                array_push_back(&buf, &c);
                         }
                  default:
-                        size = 0;
+                        array_clear(&buf);
                         do {
-                                if (size == alloc) {
-                                        alloc = alloc ? alloc * 2 : 2;
-                                        buf = realloc(buf, alloc);
-                                }
-                                buf[size++] = c;
+                                array_push_back(&buf, &c);
                                 c = fgetc(f);
                         } while (c != EOF && !isspace(c));
                         ungetc(c, f);
-                        lvalp->ast = zz_str_with_len(buf, size);
+                        lvalp->ast = zz_str_with_len(buf.buf, buf.len);
                         return ATOM;
                 }
         }
