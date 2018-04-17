@@ -7,6 +7,7 @@ ALL_LDFLAGS += -lreadline -lgc
 bins += calc
 bins += math
 bins += lisp
+bins += json
 bins += shon
 
 deps = $(addprefix .obj/,$(addsuffix .d,$(bins)))
@@ -18,6 +19,7 @@ all: $(bins)
 calc: .obj/calc.o .obj/test.o ../src/libzebu2.a
 math: .obj/math.o .obj/test.o ../src/libzebu2.a
 lisp: .obj/lisp.o .obj/test.o ../src/libzebu2.a
+json: .obj/json.o .obj/test.o ../src/libzebu2.a
 shon: .obj/shon.o .obj/test.o ../src/libzebu2.a
 
 ../src/libzebu2.a:
