@@ -17,6 +17,10 @@ struct zz_ast *copy_int(struct zz_ast *a)
 {
         return a;
 }
+struct zz_ast *copy_double(struct zz_ast *a)
+{
+        return a;
+}
 struct zz_ast *copy_ptr(struct zz_ast *a)
 {
         return a;
@@ -47,6 +51,12 @@ int cmp_int(struct zz_ast *a, struct zz_ast *b)
         struct zz_int *y = (void *)b;
         return x->num - y->num;
 }
+int cmp_double(struct zz_ast *a, struct zz_ast *b)
+{
+        struct zz_double *x = (void *)a;
+        struct zz_double *y = (void *)b;
+        return (x->num < y->num) ? -1 : (x->num > y->num) ? 1 : 0;
+}
 int cmp_ptr(struct zz_ast *a, struct zz_ast *b)
 {
         struct zz_ptr *x = (void *)a;
@@ -75,19 +85,21 @@ int serialize_pair(struct zz_ast *a, FILE * f)
         }
         return ret;
 }
-
 int serialize_int(struct zz_ast *a, FILE * f)
 {
         struct zz_int *x = (void *)a;
         return fprintf(f, "%d", x->num);
 }
-
+int serialize_double(struct zz_ast *a, FILE * f)
+{
+        struct zz_double *x = (void *)a;
+        return fprintf(f, "%lf", x->num);
+}
 int serialize_ptr(struct zz_ast *a, FILE * f)
 {
         struct zz_ptr *x = (void *)a;
         return fprintf(f, "%p", x->ptr);
 }
-
 int serialize_str(struct zz_ast *a, FILE * f)
 {
         struct zz_str *x = (void *)a;
@@ -97,7 +109,7 @@ int serialize_str(struct zz_ast *a, FILE * f)
 const struct zz_type *zz_null_type(void)
 {
         static struct zz_type type = {
-                .name = "zz_null",
+                .name = "Null",
                 .serialize = serialize_null,
                 .copy = copy_null,
                 .cmp = cmp_null,
@@ -108,7 +120,7 @@ const struct zz_type *zz_null_type(void)
 const struct zz_type *zz_pair_type(void)
 {
         static struct zz_type type = {
-                .name = "zz_pair",
+                .name = "Pair",
                 .serialize = serialize_pair,
                 .copy = copy_pair,
                 .cmp = cmp_pair,
@@ -119,7 +131,7 @@ const struct zz_type *zz_pair_type(void)
 const struct zz_type *zz_int_type(void)
 {
         static struct zz_type type = {
-                .name = "zz_int",
+                .name = "Int",
                 .serialize = serialize_int,
                 .copy = copy_int,
                 .cmp = cmp_int,
@@ -127,10 +139,21 @@ const struct zz_type *zz_int_type(void)
         return &type;
 }
 
+const struct zz_type *zz_double_type(void)
+{
+        static struct zz_type type = {
+                .name = "Double",
+                .serialize = serialize_double,
+                .copy = copy_double,
+                .cmp = cmp_double,
+        };
+        return &type;
+}
+
 const struct zz_type *zz_ptr_type(void)
 {
         static struct zz_type type = {
-                .name = "zz_ptr",
+                .name = "Ptr",
                 .serialize = serialize_ptr,
                 .copy = copy_ptr,
                 .cmp = cmp_ptr,
@@ -141,7 +164,7 @@ const struct zz_type *zz_ptr_type(void)
 const struct zz_type *zz_str_type(void)
 {
         static struct zz_type type = {
-                .name = "zz_str",
+                .name = "Str",
                 .serialize = serialize_str,
                 .copy = copy_str,
                 .cmp = cmp_str,
@@ -211,6 +234,14 @@ struct zz_ast *zz_int(int num)
 {
         struct zz_int *a = GC_malloc_atomic(sizeof(*a));
         a->type = zz_int_type();
+        a->num = num;
+        return (void *)a;
+}
+
+struct zz_ast *zz_double(double num)
+{
+        struct zz_double *a = GC_malloc_atomic(sizeof(*a));
+        a->type = zz_double_type();
         a->num = num;
         return (void *)a;
 }

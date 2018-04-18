@@ -20,6 +20,7 @@ struct zz_type {
 const struct zz_type *zz_null_type(void);
 const struct zz_type *zz_pair_type(void);
 const struct zz_type *zz_int_type(void);
+const struct zz_type *zz_double_type(void);
 const struct zz_type *zz_ptr_type(void);
 const struct zz_type *zz_str_type(void);
 
@@ -79,6 +80,13 @@ struct zz_int {
 };
 
 struct zz_ast *zz_int(int num);
+
+struct zz_double {
+        const struct zz_type *type;
+        double num;
+};
+
+struct zz_ast *zz_double(double num);
 
 struct zz_ptr {
         const struct zz_type *type;
