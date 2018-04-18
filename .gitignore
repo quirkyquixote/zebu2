@@ -5,5 +5,7 @@
 examples/calc
 examples/math
 examples/lisp
+examples/json
+examples/conf
 examples/shon
 doc/_build
