@@ -93,7 +93,7 @@ int serialize_int(struct zz_ast *a, FILE * f)
 int serialize_double(struct zz_ast *a, FILE * f)
 {
         struct zz_double *x = (void *)a;
-        return fprintf(f, "%lf", x->num);
+        return fprintf(f, "%g", x->num);
 }
 int serialize_ptr(struct zz_ast *a, FILE * f)
 {
