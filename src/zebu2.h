@@ -63,8 +63,9 @@ struct zz_pair {
 struct zz_ast *zz_pair(struct zz_ast *head, struct zz_ast *tail);
 struct zz_ast *zz_head(struct zz_ast *a);
 struct zz_ast *zz_tail(struct zz_ast *a);
+void zz_set_head(struct zz_ast *a, struct zz_ast *head);
+void zz_set_tail(struct zz_ast *a, struct zz_ast *tail);
 struct zz_ast *zz_insert(struct zz_ast *a, struct zz_ast *next);
-void zz_replace(struct zz_ast *a, struct zz_ast *head);
 int _zz_unpack(struct zz_ast *list, ...);
 #define zz_unpack(...) _zz_unpack(__VA_ARGS__, zz_arg_list_end())
 struct zz_ast *zz_index(struct zz_ast *a, int i);

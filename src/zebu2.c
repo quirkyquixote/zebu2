@@ -193,16 +193,20 @@ struct zz_ast *zz_tail(struct zz_ast *a)
         return p == NULL ? NULL : p->tail;
 }
 
+void zz_set_head(struct zz_ast *a, struct zz_ast *head)
+{
+        zz_cast(zz_pair, a)->head = head;
+}
+
+void zz_set_tail(struct zz_ast *a, struct zz_ast *tail)
+{
+        zz_cast(zz_pair, a)->tail = tail;
+}
+
 struct zz_ast *zz_insert(struct zz_ast *a, struct zz_ast *next)
 {
         struct zz_pair *p = zz_cast(zz_pair, a);
         return (p->tail = zz_pair(next, p->tail));
-}
-
-void zz_replace(struct zz_ast *a, struct zz_ast *head)
-{
-        struct zz_pair *p = zz_cast(zz_pair, a);
-        p->head = head;
 }
 
 int _zz_unpack(struct zz_ast *list, ...)
