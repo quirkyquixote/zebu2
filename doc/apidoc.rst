@@ -175,6 +175,11 @@ head, that can be another list) and the next element (the tail).
 :func:`zz_foreach()`           iterate on a list of pairs
 :func:`zz_unpack()`            extract all list elements
 :func:`zz_index()`             return nth element
+:func:`zz_find()`              find element
+:func:`zz_find_if()`           find element
+:func:`zz_remove()`            remove elements
+:func:`zz_remove_if()`         remove elements
+:func:`zz_sort()`              sort list
 ============================== ============================================
 
 .. member:: const struct zz_type* zz_pair.type
@@ -234,6 +239,40 @@ head, that can be another list) and the next element (the tail).
    :data:`zz_index(a, N)` for every other :data:`N` returns :data:`NULL`.
    For every :data:`i` past the end of the list, :data:`NULL` is returned.
    Append an element to an existing list.
+
+.. function:: struct zz_ast* zz_find(struct zz_ast* l, struct zz_ast* x)
+              struct zz_ast* zz_find_if(struct zz_ast* l,\
+                        int(* func)(struct zz_ast*, void*), void* data)
+
+   Find elements in a list of pairs.                     
+
+   :func:`zz_find()` finds the first element in the list :data:`l` that
+   satisfies ``zz_cmp(zz_head(e), x) == 0``, or :data:`NULL` if no such element
+   exists.
+
+   :func:`zz_find_if()` finds the first element in the list :data:`l` that
+   satisfies ``func(zz_head(e), data)``, or :data:`NULL` if no such element
+   exists.
+
+.. function:: struct zz_ast* zz_remove(struct zz_ast* l, struct zz_ast* x)
+              struct zz_ast* zz_remove_if(struct zz_ast* l,\
+                        int(* func)(struct zz_ast*, void*), void* data)
+
+   Remove elements from a list of pairs.
+
+   :func:`zz_remove()` removes from :data:`l` all elements that satisfy
+   ``zz_cmp(zz_head(e), x) == 0``, and returns a pointer to the first element of
+   the new list. The old list is invalidated.
+
+   :func:`zz_remove_if()` removes from :data:`l` all elements that satisfy
+   ``func(zz_head(e), data)``, and returns a pointer to the first element of
+   the new list. The old list is invalidated.
+
+.. function:: struct zz_ast* zz_sort(struct zz_ast* l,\
+                        int(* cmp)(struct zz_ast*, struct zz_ast*))
+
+   Sorts the pairs in the list whose first element is :data:`l` so for every
+   consecutive pair, ``cmp(zz_head(i), zz_head(i + 1)) <= 0``.
 
 Integer
 -------

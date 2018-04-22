@@ -230,6 +230,83 @@ struct zz_ast *zz_index(struct zz_ast *a, int i)
         return zz_head(a);
 }
 
+struct zz_ast *zz_find(struct zz_ast *l, struct zz_ast *x)
+{
+        for (; l != NULL; l = zz_tail(l)) {
+                if (zz_cmp(zz_head(l), x) == 0)
+                        return l;
+        }
+        return l;
+}
+struct zz_ast *zz_find_if(struct zz_ast *l,
+                int(* func)(struct zz_ast *, void *), void *data)
+{
+        for (; l != NULL; l = zz_tail(l)) {
+                if (func(zz_head(l), data))
+                        return l;
+        }
+        return l;
+}
+
+struct zz_ast *zz_remove(struct zz_ast *l, struct zz_ast *x)
+{
+        for (struct zz_pair **i = (void *)&l; *i != NULL;) {
+                if (zz_cmp((*i)->head, x) == 0)
+                        *i = (void *)(*i)->tail;
+                else
+                        i = (void *)&((*i)->tail);
+
+        }
+        return l;
+}
+struct zz_ast *zz_remove_if(struct zz_ast *l,
+                int(* func)(struct zz_ast *, void *), void *data)
+{
+        for (struct zz_pair **i = (void *)&l; *i != NULL;) {
+                if (func((*i)->head, data))
+                        *i = (void *)(*i)->tail;
+                else
+                        i = (void *)&((*i)->tail);
+
+        }
+        return l;
+}
+
+struct zz_ast *merge_sort(struct zz_ast *l, struct zz_ast *r,
+                int(* cmp)(struct zz_ast *, struct zz_ast *))
+{
+        if (l == NULL)
+                return r;
+        if (r == NULL )
+                return l;
+        if (cmp(zz_head(l), zz_head(r)) <  0) {
+                struct zz_pair *p = zz_cast(zz_pair, l);
+                p->tail = merge_sort(p->tail, r, cmp);
+                return l;
+        } else {
+                struct zz_pair *p = zz_cast(zz_pair, r);
+                p->tail = merge_sort(l, p->tail, cmp);
+                return r;
+        }
+}
+struct zz_ast *zz_sort(struct zz_ast *l,
+                int(* cmp)(struct zz_ast *, struct zz_ast *))
+{
+        if (l == NULL || zz_tail(l) == NULL)
+                return l;
+        struct zz_ast *m = l, *r = l;
+        for (;;) {
+                if ((r = zz_tail(r)) == NULL)
+                        break;
+                if ((r = zz_tail(r)) == NULL)
+                        break;
+                m = zz_tail(m);
+        }
+        r = zz_tail(m);
+        zz_cast(zz_pair, m)->tail = NULL;
+        return merge_sort(zz_sort(l, cmp), zz_sort(r, cmp), cmp);
+}
+
 struct zz_ast *zz_int(int num)
 {
         struct zz_int *a = GC_malloc_atomic(sizeof(*a));

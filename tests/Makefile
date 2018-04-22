@@ -20,6 +20,11 @@ tests += zz_list
 tests += zz_append
 tests += zz_prepend
 tests += zz_merge
+tests += zz_find
+tests += zz_find_if
+tests += zz_remove
+tests += zz_remove_if
+tests += zz_sort
 
 deps = $(addprefix .obj/,$(addsuffix .d,tests))
 
@@ -46,6 +51,11 @@ zz_list: .obj/zz_list.o $(root_dir)src/libzebu2.a
 zz_append: .obj/zz_append.o $(root_dir)src/libzebu2.a
 zz_prepend: .obj/zz_prepend.o $(root_dir)src/libzebu2.a
 zz_merge: .obj/zz_merge.o $(root_dir)src/libzebu2.a
+zz_find: .obj/zz_find.o $(root_dir)src/libzebu2.a
+zz_find_if: .obj/zz_find_if.o $(root_dir)src/libzebu2.a
+zz_remove: .obj/zz_remove.o $(root_dir)src/libzebu2.a
+zz_remove_if: .obj/zz_remove_if.o $(root_dir)src/libzebu2.a
+zz_sort: .obj/zz_sort.o $(root_dir)src/libzebu2.a
 
 $(root_dir)src/libzebu2.a:
 	(call descend,$(root_dir)src,libzebu2.a)

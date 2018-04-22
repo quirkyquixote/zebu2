@@ -69,6 +69,15 @@ int _zz_unpack(struct zz_ast *list, ...);
 #define zz_unpack(...) _zz_unpack(__VA_ARGS__, zz_arg_list_end())
 struct zz_ast *zz_index(struct zz_ast *a, int i);
 
+struct zz_ast *zz_find(struct zz_ast *l, struct zz_ast *x);
+struct zz_ast *zz_find_if(struct zz_ast *l,
+                int(* func)(struct zz_ast *, void *), void *data);
+struct zz_ast *zz_remove(struct zz_ast *l, struct zz_ast *x);
+struct zz_ast *zz_remove_if(struct zz_ast *l,
+                int(* func)(struct zz_ast *, void *), void *data);
+struct zz_ast *zz_sort(struct zz_ast *l,
+                int(* comp)(struct zz_ast *, struct zz_ast *));
+
 #define zz_foreach(_x, _head) \
 for (struct zz_ast* _i = _head; _x = zz_head(_i), _i; _i = zz_tail(_i))
 
