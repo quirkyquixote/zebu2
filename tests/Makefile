@@ -20,6 +20,7 @@ tests += list
 tests += append
 tests += prepend
 tests += merge
+tests += set_index
 tests += find
 tests += find_if
 tests += remove
@@ -51,6 +52,7 @@ list: .obj/list.o $(root_dir)src/libzebu2.a
 append: .obj/append.o $(root_dir)src/libzebu2.a
 prepend: .obj/prepend.o $(root_dir)src/libzebu2.a
 merge: .obj/merge.o $(root_dir)src/libzebu2.a
+set_index: .obj/set_index.o $(root_dir)src/libzebu2.a
 find: .obj/find.o $(root_dir)src/libzebu2.a
 find_if: .obj/find_if.o $(root_dir)src/libzebu2.a
 remove: .obj/remove.o $(root_dir)src/libzebu2.a

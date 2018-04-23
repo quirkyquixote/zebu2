@@ -69,6 +69,7 @@ struct zz_ast *zz_insert(struct zz_ast *a, struct zz_ast *next);
 int _zz_unpack(struct zz_ast *list, ...);
 #define zz_unpack(...) _zz_unpack(__VA_ARGS__, zz_arg_list_end())
 struct zz_ast *zz_index(struct zz_ast *a, int i);
+void zz_set_index(struct zz_ast *a, int i, struct zz_ast *head);
 
 struct zz_ast *zz_find(struct zz_ast *l, struct zz_ast *x);
 struct zz_ast *zz_find_if(struct zz_ast *l,

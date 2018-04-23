@@ -233,6 +233,12 @@ struct zz_ast *zz_index(struct zz_ast *a, int i)
                 a = zz_tail(a);
         return zz_head(a);
 }
+void zz_set_index(struct zz_ast *a, int i, struct zz_ast *head)
+{
+        while (i--)
+                a = zz_tail(a);
+        zz_set_head(a, head);
+}
 
 struct zz_ast *zz_find(struct zz_ast *l, struct zz_ast *x)
 {
