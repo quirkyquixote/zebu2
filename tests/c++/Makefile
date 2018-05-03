@@ -10,6 +10,8 @@ tests += double
 tests += string
 tests += pair
 tests += list
+tests += for_each
+tests += serialize
 
 deps = $(addprefix .obj/,$(addsuffix .d,tests))
 
@@ -25,6 +27,8 @@ double: .obj/double.o
 string: .obj/string.o
 pair: .obj/pair.o
 list: .obj/list.o
+for_each: .obj/for_each.o
+serialize: .obj/serialize.o	
 
 .PHONY: clean
 clean:

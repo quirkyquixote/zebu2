@@ -4,32 +4,29 @@
 #include "zebu2.hh"
 
 using namespace zz;
+using namespace std::string_literals;
 
 int main(int argc, char *argv[])
 {
         try {
-                Ast a{0};
-                a.get<double>();
+                ast_get<double>(static_cast<const Ast*>(nullptr));
                 abort();
         } catch(std::exception& ex) {
 
         }
         try {
-                Ast a;
-                a.get<double>();
+                ast_get<double>(make_ast(0));
                 abort();
         } catch(std::exception& ex) {
 
         }
         try {
-                Ast a{1.0};
-                assert(a.get<double>() == 1.0);
+                assert(ast_get<double>(make_ast(1.0)) == 1.0);
         } catch(std::exception& ex) {
 
         }
         try {
-                Ast a{"foo"};
-                a.get<double>();
+                ast_get<double>(make_ast("foo"s));
                 abort();
         } catch(std::exception& ex) {
 

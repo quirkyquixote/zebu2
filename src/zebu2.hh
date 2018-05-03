@@ -1,235 +1,237 @@
 
-#include <algorithm>
-#include <stdexcept>
-#include <string>
+#include <ostream>
+#include <typeinfo>
 
 #include "gc_cpp.h"
 
 namespace zz {
 
-class Ast;
 
-class Ast {
- private:
-        struct Base : public gc {
-                virtual bool eq(const Base* other) const = 0;
-                virtual bool ne(const Base* other) const = 0;
-                virtual bool lt(const Base* other) const = 0;
-                virtual bool gt(const Base* other) const = 0;
-                virtual bool le(const Base* other) const = 0;
-                virtual bool ge(const Base* other) const = 0;
-        };
-
-        template<typename T> struct Impl : public Base {
-                T data;
-                Impl(T data) : data{data} {}
-                static Impl<T>* cast(Base *p)
-                {
-                        auto i = dynamic_cast<Impl<T>*>(p);
-                        if (i == nullptr)
-                                throw std::runtime_error("Bad AST cast");
-                        return i;
-                }
-                static const Impl<T>* cast(const Base *p)
-                {
-                        auto i = dynamic_cast<const Impl<T>*>(p);
-                        if (i == nullptr)
-                                throw std::runtime_error("Bad AST cast");
-                        return i;
-                }
-                bool eq(const Base* other) const
-                {
-                        return data == cast(other)->data;
-                }
-                bool ne(const Base* other) const
-                {
-                        return data != cast(other)->data;
-                }
-                bool lt(const Base* other) const
-                {
-                        return data < cast(other)->data;
-                }
-                bool gt(const Base* other) const
-                {
-                        return data > cast(other)->data;
-                }
-                bool le(const Base* other) const
-                {
-                        return data <= cast(other)->data;
-                }
-                bool ge(const Base* other) const
-                {
-                        return data >= cast(other)->data;
-                }
-        };
-
-        typedef Impl<std::pair<Ast, Ast>> Pair;
-
- public:
-        class iterator {
-         public:
-                iterator() = default;
-                iterator(Ast* ptr) : ptr{ptr} {}
-                const Ast& operator*() const
-                {
-                        if (ptr == nullptr)
-                                throw std::runtime_error("Bad iterator");
-                        auto p = dynamic_cast<Pair*>(ptr->impl);
-                        return p ? p->data.first : *ptr;
-                }
-                Ast& operator*()
-                {
-                        if (ptr == nullptr)
-                                throw std::runtime_error("Bad iterator");
-                        auto p = dynamic_cast<Pair*>(ptr->impl);
-                        return p ? p->data.first : *ptr;
-                }
-                iterator& operator++()
-                {
-                        if (ptr == nullptr)
-                                throw std::runtime_error("Bad iterator");
-                        auto p = dynamic_cast<Pair*>(ptr->impl);
-                        ptr = p ? &p->data.second : nullptr;
-                        return *this;
-                }
-                iterator operator++(int)
-                {
-                        auto ret = *this;
-                        ++*this;
-                        return ret;
-                }
-                bool operator==(const iterator& other) const
-                {
-                        return ptr == other.ptr;
-                }
-                bool operator!=(const iterator& other) const
-                {
-                        return ptr != other.ptr;
-                }
-
-         private:
-                Ast* ptr = nullptr;
-        };
-
-        class const_iterator {
-         public:
-                const_iterator() = default;
-                const_iterator(const Ast* ptr) : ptr{ptr} {}
-                const Ast& operator*() const
-                {
-                        if (ptr == nullptr)
-                                throw std::runtime_error("Bad iterator");
-                        auto p = dynamic_cast<const Pair*>(ptr->impl);
-                        return p ? p->data.first : *ptr;
-                }
-                const_iterator& operator++()
-                {
-                        if (ptr == nullptr)
-                                throw std::runtime_error("Bad iterator");
-                        auto p = dynamic_cast<const Pair*>(ptr->impl);
-                        ptr = p ? &p->data.second : nullptr;
-                        return *this;
-                }
-                const_iterator operator++(int)
-                {
-                        auto ret = *this;
-                        ++*this;
-                        return ret;
-                }
-                bool operator==(const const_iterator& other) const
-                {
-                        return ptr == other.ptr;
-                }
-                bool operator!=(const const_iterator& other) const
-                {
-                        return ptr != other.ptr;
-                }
-
-         private:
-                const Ast* ptr = nullptr;
-        };
-
-        template<typename T> friend Ast make_ast(const T& data);
-        template<typename T> friend T& ast_cast(Ast& a);
-
-        Ast() : impl{nullptr} {}
-        template<typename T> Ast(T data) : impl{new Impl<T>{data}} {}
-        Ast(Ast head, Ast tail) : impl{new Pair{std::make_pair(head, tail)}} {}
-        Ast(const Ast& other) : impl{other.impl} {}
-        Ast(Ast&& other) : impl{std::move(other.impl)} {}
-
-        ~Ast() = default;
-
-        Ast& operator=(const Ast& other)
-        {
-                impl = other.impl;
-                return *this;
-        }
-        Ast& operator=(Ast&& other)
-        {
-                impl = std::move(other.impl);
-                return *this;
-        }
-
-        operator bool() const { return impl != nullptr; }
-        template<typename T> T& get() { return Impl<T>::cast(impl)->data; }
-
-        bool operator==(const Ast& other) const { return impl->eq(other.impl); }
-        bool operator!=(const Ast& other) const { return impl->ne(other.impl); }
-        bool operator<(const Ast& other) const { return impl->lt(other.impl); }
-        bool operator>(const Ast& other) const { return impl->gt(other.impl); }
-        bool operator<=(const Ast& other) const { return impl->le(other.impl); }
-        bool operator>=(const Ast& other) const { return impl->ge(other.impl); }
-
-        iterator begin() { return iterator{this}; }
-        iterator end() { return iterator{nullptr}; }
-        const_iterator begin() const { return const_iterator{this}; }
-        const_iterator end() const { return const_iterator{nullptr}; }
-
-        Ast head() const
-        {
-                return *begin();
-        }
-        Ast tail() const
-        {
-                auto p = dynamic_cast<Pair*>(impl);
-                if (p == nullptr)
-                        return Ast{};
-                return p->data.second;
-        }
-        iterator insert(iterator it, Ast x)
-        {
-                *it->ptr = Ast{x, *it->ptr};
-                return it;
-        }
-
-        Ast operator[](int i) const
-        {
-                auto it{begin()};
-                auto it_end{end()};
-                while (it != it_end) {
-                        if (i == 0)
-                                return *it;
-                        --i;
-                        ++it;
-                }
-                return Ast{};
-        }
-        Ast& operator[](int i)
-        {
-                auto it{begin()};
-                auto it_end{end()};
-                while (it != it_end) {
-                        if (i == 0)
-                                return *it;
-                        --i;
-                        ++it;
-                }
-                throw std::runtime_error{"List out of range"};
-        }
-
- private:
-        Base* impl;
+struct Ast : public gc {
+        virtual ~Ast() = default;
+        virtual bool operator==(const Ast& other) const = 0;
+        virtual bool operator!=(const Ast& other) const = 0;
+        virtual bool operator<(const Ast& other) const = 0;
+        virtual bool operator>(const Ast& other) const = 0;
+        virtual bool operator<=(const Ast& other) const = 0;
+        virtual bool operator>=(const Ast& other) const = 0;
+        virtual void serialize(std::ostream& os) const = 0;
+        virtual const std::type_info& type() const noexcept = 0;
 };
+
+template<typename T> inline T ast_get(const Ast* ast);
+template<typename T> inline T& ast_get(Ast* ast);
+
+template<typename T> class Ast_impl : public Ast {
+ public:
+        Ast_impl(const T& data) : data{data} {}
+        Ast_impl(T&& data) : data{std::move(data)} {}
+
+        ~Ast_impl() = default;
+
+        bool operator==(const Ast& other) const
+        {
+                return data >= ast_get<T>(&other);
+        }
+        bool operator!=(const Ast& other) const
+        {
+                return data != ast_get<T>(&other);
+        }
+        bool operator<(const Ast& other) const
+        {
+                return data < ast_get<T>(&other);
+        }
+        bool operator>(const Ast& other) const
+        {
+                return data > ast_get<T>(&other);
+        }
+        bool operator<=(const Ast& other) const
+        {
+                return data <= ast_get<T>(&other);
+        }
+        bool operator>=(const Ast& other) const
+        {
+                return data >= ast_get<T>(&other);
+        }
+        void serialize(std::ostream& os) const
+        {
+                os << data;
+        }
+
+        const std::type_info& type() const noexcept
+        {
+                return typeid(T);
+        }
+
+        T data;
+};
+
+template<typename T> inline Ast* make_ast(const T& value)
+{
+        return new Ast_impl<T>{value};
+}
+template<typename T> inline Ast* make_ast(T&& value)
+{
+        return new Ast_impl<T>{std::move(value)};
+}
+inline Ast* make_pair(Ast* head, Ast* tail)
+{
+        return make_ast(std::make_pair(head, tail));
+}
+inline Ast* make_list()
+{
+        return nullptr;
+}
+template<typename ...Args> inline Ast* make_list(Ast* head, Args... args)
+{
+        return make_pair(head, make_list(args...));
+}
+
+template<typename T> inline T& ast_get(Ast* ast)
+{
+        auto p = dynamic_cast<Ast_impl<T>*>(ast);
+        if (p == nullptr)
+                throw std::bad_cast{};
+        return p->data;
+}
+template<typename T> inline T ast_get(const Ast* ast)
+{
+        auto p = dynamic_cast<const Ast_impl<T>*>(ast);
+        if (p == nullptr)
+                throw std::bad_cast{};
+        return p->data;
+}
+
+inline const Ast* head(const Ast* ast)
+{
+        if (ast->type() == typeid(std::pair<Ast*, Ast*>))
+                return ast_get<std::pair<Ast*, Ast*>>(ast).first;
+        return ast;
+}
+inline Ast* head(Ast* ast)
+{
+        if (ast->type() == typeid(std::pair<Ast*, Ast*>))
+                return ast_get<std::pair<Ast*, Ast*>>(ast).first;
+        return ast;
+}
+inline const Ast* tail(const Ast* ast)
+{
+        if (ast->type() == typeid(std::pair<Ast*, Ast*>))
+                return ast_get<std::pair<Ast*, Ast*>>(ast).second;
+        return nullptr;
+}
+inline Ast* tail(Ast* ast)
+{
+        if (ast->type() == typeid(std::pair<Ast*, Ast*>))
+                return ast_get<std::pair<Ast*, Ast*>>(ast).second;
+        return nullptr;
+}
+
+class Ast_iterator {
+ public:
+        Ast_iterator(Ast* ptr) : ptr{ptr} {}
+        Ast*& operator*()
+        {
+                assert(ptr != nullptr);
+                return ast_get<std::pair<Ast*, Ast*>>(ptr).first;
+        }
+        Ast_iterator& operator++()
+        {
+                ptr = tail(ptr);
+                return *this;
+        }
+        Ast_iterator operator++(int)
+        {
+                auto ret = *this;
+                ptr = tail(ptr);
+                return ret;
+        }
+        bool operator==(const Ast_iterator& other) const
+        {
+                return ptr == other.ptr;
+        }
+        bool operator!=(const Ast_iterator& other) const
+        {
+                return ptr != other.ptr;
+        }
+
+ private:
+        Ast* ptr;
+};
+
+inline Ast_iterator begin(Ast* ptr)
+{
+        return Ast_iterator{ptr};
+}
+inline Ast_iterator end(Ast* ptr)
+{
+        return Ast_iterator{nullptr};
+}
+
+class Ast_const_iterator {
+ public:
+        Ast_const_iterator(const Ast* ptr) : ptr{ptr} {}
+        const Ast* operator*()
+        {
+                assert(ptr != nullptr);
+                return ast_get<std::pair<Ast*, Ast*>>(ptr).first;
+        }
+        Ast_const_iterator& operator++()
+        {
+                ptr = tail(ptr);
+                return *this;
+        }
+        Ast_const_iterator operator++(int)
+        {
+                auto ret = *this;
+                ptr = tail(ptr);
+                return ret;
+        }
+        bool operator==(const Ast_const_iterator& other) const
+        {
+                return ptr == other.ptr;
+        }
+        bool operator!=(const Ast_const_iterator& other) const
+        {
+                return ptr != other.ptr;
+        }
+
+ private:
+        const Ast* ptr;
+};
+
+inline Ast_const_iterator begin(const Ast* ptr)
+{
+        return Ast_const_iterator{ptr};
+}
+inline Ast_const_iterator end(const Ast* ptr)
+{
+        return Ast_const_iterator{nullptr};
+}
+
+inline std::ostream& operator<<(std::ostream& os, const std::pair<Ast*, Ast*>& p)
+{
+        /* do nothing. handled by the general Ast* serializer */
+}
+inline std::ostream& operator<<(std::ostream& os, const Ast* ast)
+{
+        if (ast == nullptr) {
+                os << "()";
+        } else if (ast->type() == typeid(std::pair<Ast*, Ast*>)) {
+                os << '(';
+                bool first = true;
+                for (const auto x : ast) {
+                        if (first)
+                                first = false;
+                        else
+                                os << ' ';
+                        os << x;
+                }
+                os << ')';
+        } else {
+                ast->serialize(os);
+        }
+        return os;
+}
 
 };      // numespace zz
