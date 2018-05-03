@@ -42,18 +42,10 @@ ALL_CXXFLAGS := $(CPPFLAGS) $(CXXFLAGS)
 ALL_LDFLAGS := $(LDFLAGS)
 
 ALL_CFLAGS += -std=gnu11
-ALL_CFLAGS += -DVERSION=\"$(VERSION)\"
-ALL_CFLAGS += -DLIBDIR=\"$(libdir)\"
-ALL_CFLAGS += -DDATADIR=\"$(datadir)\"
-ALL_CFLAGS += -DLOCALSTATEDIR=\"$(localstatedir)\"
 ALL_CFLAGS += -MD
 ALL_CFLAGS += -fPIC
 
 ALL_CXXFLAGS += -std=c++14
-ALL_CXXFLAGS += -DVERSION=\"$(VERSION)\"
-ALL_CXXFLAGS += -DLIBDIR=\"$(libdir)\"
-ALL_CXXFLAGS += -DDATADIR=\"$(datadir)\"
-ALL_CXXFLAGS += -DLOCALSTATEDIR=\"$(localstatedir)\"
 ALL_CXXFLAGS += -MD
 ALL_CXXFLAGS += -fPIC
 
@@ -89,10 +81,10 @@ endif
 	mkdir $@
 
 %: .obj/%.o
-	$(QUIET_CC)$(CC) $(ALL_CFLAGS) $(ALL_LDFLAGS) $^ -o $@
+	$(QUIET_CC)$(CC) $(ALL_LDFLAGS) $^ -o $@
 
 %: %.c
-	$(QUIET_CC)$(CC) $(ALL_CFLAGS) $(ALL_LDFLAGS) $^ -o $@
+%: %.cc
 
 %.a:
 	$(QUIET_AR)$(AR) rc $@ $^
