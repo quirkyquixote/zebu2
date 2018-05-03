@@ -129,7 +129,24 @@ inline Ast* tail(Ast* ast)
 
 class Ast_iterator {
  public:
+        typedef Ast* value_type;
+        typedef ptrdiff_t difference_type;
+        typedef Ast** pointer;
+        typedef Ast*& reference;
+        typedef std::forward_iterator_tag iterator_category;
+
+        Ast_iterator() : ptr{nullptr} {}
         Ast_iterator(Ast* ptr) : ptr{ptr} {}
+        Ast_iterator(const Ast_iterator& other) : ptr{other.ptr} {}
+        Ast_iterator(Ast_iterator&& other) : ptr{std::move(other.ptr)} {}
+        Ast_iterator& operator=(const Ast_iterator& other)
+        {
+                ptr = other.ptr;
+        }
+        Ast_iterator& operator=(Ast_iterator&& other)
+        {
+                ptr = std::move(other.ptr);
+        }
         Ast*& operator*()
         {
                 assert(ptr != nullptr);
@@ -170,7 +187,24 @@ inline Ast_iterator end(Ast* ptr)
 
 class Ast_const_iterator {
  public:
+        typedef Ast* value_type;
+        typedef ptrdiff_t difference_type;
+        typedef Ast** pointer;
+        typedef Ast*& reference;
+        typedef std::forward_iterator_tag iterator_category;
+
+        Ast_const_iterator() : ptr{nullptr} {}
         Ast_const_iterator(const Ast* ptr) : ptr{ptr} {}
+        Ast_const_iterator(const Ast_const_iterator& other) : ptr{other.ptr} {}
+        Ast_const_iterator(Ast_const_iterator&& other) : ptr{std::move(other.ptr)} {}
+        Ast_const_iterator& operator=(const Ast_const_iterator& other)
+        {
+                ptr = other.ptr;
+        }
+        Ast_const_iterator& operator=(Ast_const_iterator&& other)
+        {
+                ptr = std::move(other.ptr);
+        }
         const Ast* operator*()
         {
                 assert(ptr != nullptr);

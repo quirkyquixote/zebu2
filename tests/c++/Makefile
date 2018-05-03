@@ -11,6 +11,7 @@ tests += string
 tests += pair
 tests += list
 tests += for_each
+tests += find
 tests += serialize
 
 deps = $(addprefix .obj/,$(addsuffix .d,tests))
@@ -28,6 +29,7 @@ string: .obj/string.o
 pair: .obj/pair.o
 list: .obj/list.o
 for_each: .obj/for_each.o
+find: .obj/find.o
 serialize: .obj/serialize.o	
 
 .PHONY: clean
