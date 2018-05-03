@@ -2,7 +2,7 @@
 #include <cassert>
 #include <sstream>
 
-#include "zebu2.hh"
+#include "zebu2_cpp.h"
 
 using namespace zz;
 using namespace std::string_literals;

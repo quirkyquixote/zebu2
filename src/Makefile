@@ -7,6 +7,7 @@ deps = $(srcs:.o=.d)
 
 inst += $(DESTDIR)$(libdir)/libzebu2.so
 inst += $(DESTDIR)$(prefix)/include/zebu2.h
+inst += $(DESTDIR)$(prefix)/include/zebu2_cpp.h
 
 .PHONY: all
 all: libzebu2.so libzebu2.a
