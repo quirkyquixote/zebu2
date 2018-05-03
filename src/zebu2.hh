@@ -268,4 +268,20 @@ inline std::ostream& operator<<(std::ostream& os, const Ast* ast)
         return os;
 }
 
+template<typename Pred> inline Ast* remove_if(Ast* l, Pred pred)
+{
+        auto p = dynamic_cast<Ast_impl<std::pair<Ast*, Ast*>>*>(l);
+        if (p == nullptr)
+                return l;
+        p->data.second = remove_if(p->data.second, pred);
+        if (pred(p->data.first))
+                return p->data.second;
+        return p;
+}
+inline Ast* remove(Ast* l, Ast* x)
+{
+        return remove_if(l, [x](Ast* y){ return x == y; });
+}
+
 };      // numespace zz
+
