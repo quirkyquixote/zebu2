@@ -32,20 +32,22 @@ INSTALL_DATA := $(INSTALL) -m 644
 
 CPPFLAGS ?=
 CFLAGS ?= -g -Werror -Wfatal-errors
+CXXFLAGS ?= -g -Werror -Wfatal-errors
 LDFLAGS ?=
 
 # These flags are necessary
 
 ALL_CFLAGS := $(CPPFLAGS) $(CFLAGS)
+ALL_CXXFLAGS := $(CPPFLAGS) $(CXXFLAGS)
 ALL_LDFLAGS := $(LDFLAGS)
 
 ALL_CFLAGS += -std=gnu11
-ALL_CFLAGS += -DVERSION=\"$(VERSION)\"
-ALL_CFLAGS += -DLIBDIR=\"$(libdir)\"
-ALL_CFLAGS += -DDATADIR=\"$(datadir)\"
-ALL_CFLAGS += -DLOCALSTATEDIR=\"$(localstatedir)\"
 ALL_CFLAGS += -MD
 ALL_CFLAGS += -fPIC
+
+ALL_CXXFLAGS += -std=c++14
+ALL_CXXFLAGS += -MD
+ALL_CXXFLAGS += -fPIC
 
 # To go down a level $(call descend,directory[,target[,flags]])
 
@@ -72,14 +74,17 @@ endif
 .obj/%.o: %.c | .obj
 	$(QUIET_CC)$(CC) $(ALL_CFLAGS) -c -o $@ $<
 
+.obj/%.o: %.cc | .obj
+	$(QUIET_CXX)$(CXX) $(ALL_CXXFLAGS) -c -o $@ $<
+
 .obj:
 	mkdir $@
 
 %: .obj/%.o
-	$(QUIET_CC)$(CC) $(ALL_CFLAGS) $(ALL_LDFLAGS) $^ -o $@
+	$(QUIET_CC)$(CC) $(ALL_LDFLAGS) $^ -o $@
 
 %: %.c
-	$(QUIET_CC)$(CC) $(ALL_CFLAGS) $(ALL_LDFLAGS) $^ -o $@
+%: %.cc
 
 %.a:
 	$(QUIET_AR)$(AR) rc $@ $^
