@@ -1,5 +1,5 @@
-API Doc
-=======
+C API
+=====
 
 .. default-domain:: c
 .. highlight:: c

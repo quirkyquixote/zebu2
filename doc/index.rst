@@ -17,7 +17,8 @@ Contents
    :maxdepth: 2
 
    install
-   apidoc
+   c_api
+   cpp_api
    usage
 
 
