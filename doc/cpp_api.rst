@@ -122,12 +122,12 @@ Member functions
    element is :var:`l`.
 
 
-Ast_impl
---------
+Ast_impl<T>
+-----------
 
    Actual implementation of a node, with data.
 
-.. class:: class Ast_impl : public Ast
+.. class:: template<typename T> Ast_impl : public Ast
 
 =============================== ==============================================
 Member functions
@@ -183,10 +183,10 @@ Ast_iterator
 Member types
 =============================================== ==============================
 :type:`~Ast_iterator::value_type`               value
-:type:`~Ast_iterator::difference_type`          difference 
-:type:`~Ast_iterator::pointer`                  pointer to value
-:type:`~Ast_iterator::reference`                reference to value
-:type:`~Ast_iterator::iterator_category`        type of iterator
+:type:`~Ast_iterator::difference_type`          difference
+:type:`~Ast_iterator::pointer`                  pointer
+:type:`~Ast_iterator::reference`                reference
+:type:`~Ast_iterator::iterator_category`        forward
 ----------------------------------------------- ------------------------------
 **Member functions**
 ----------------------------------------------- ------------------------------
@@ -199,23 +199,23 @@ Member types
 :func:`~Ast_iterator::operator!=()`             comparison
 =============================================== ==============================
 
-.. type:: typedef Ast* Ast_iterator::value_type
+.. type:: Ast* Ast_iterator::value_type
 
    Value held by the iterator
 
-.. type:: typedef ptrdiff_t Ast_iterator::difference_type
+.. type:: ptrdiff_t Ast_iterator::difference_type
 
    Type of difference between two iterators
 
-.. type:: typedef Ast** Ast_iterator::pointer
+.. type:: Ast** Ast_iterator::pointer
 
    Pointer to iterator value
 
-.. type:: typedef Ast*& Ast_iterator::reference
+.. type:: Ast*& Ast_iterator::reference
 
    Reference to iterator value
 
-.. type:: typedef std::forward_iterator_tag Ast_iterator::iterator_category
+.. type:: std::forward_iterator_tag Ast_iterator::iterator_category
 
    Always forward iterator
 
@@ -251,7 +251,7 @@ Member types
    Equality comparators.
 
 Ast_const_iterator
-------------
+------------------
 
    Allows treating linked lists of :type:`Ast` holding
    :type:`std::pair\<Ast*, Ast*>` objects as STL sequences.
@@ -259,13 +259,13 @@ Ast_const_iterator
 .. class:: Ast_const_iterator
 
 ===================================================== ========================
-Member types                                         
+Member types
 ===================================================== ========================
 :type:`~Ast_const_iterator::value_type`               value
 :type:`~Ast_const_iterator::difference_type`          difference
-:type:`~Ast_const_iterator::pointer`                  pointer to value
-:type:`~Ast_const_iterator::reference`                reference to value
-:type:`~Ast_const_iterator::iterator_category`        type of iterator
+:type:`~Ast_const_iterator::pointer`                  pointer
+:type:`~Ast_const_iterator::reference`                reference
+:type:`~Ast_const_iterator::iterator_category`        forward
 ----------------------------------------------------- ------------------------
 **Member functions**
 ----------------------------------------------------- ------------------------
@@ -278,23 +278,23 @@ Member types
 :func:`~Ast_const_iterator::operator!=()`             comparison
 ===================================================== ========================
 
-.. type:: typedef Ast* Ast_const_iterator::value_type
+.. type:: Ast* Ast_const_iterator::value_type
 
    Value held by the iterator
 
-.. type:: typedef ptrdiff_t Ast_const_iterator::difference_type
+.. type:: ptrdiff_t Ast_const_iterator::difference_type
 
    Type of difference between two iterators
 
-.. type:: typedef Ast** Ast_const_iterator::pointer
+.. type:: Ast** Ast_const_iterator::pointer
 
    Pointer to iterator value
 
-.. type:: typedef Ast*& Ast_const_iterator::reference
+.. type:: Ast*& Ast_const_iterator::reference
 
    Reference to iterator value
 
-.. type:: typedef std::forward_iterator_tag Ast_const_iterator::iterator_category
+.. type:: std::forward_iterator_tag Ast_const_iterator::iterator_category
 
    Always forward iterator
 
